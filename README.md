@@ -1,4 +1,4 @@
-# RT_SLAM
+# RT_BEBOP_SLAM
 
 Real-time SLAM for Bebop 2
 
