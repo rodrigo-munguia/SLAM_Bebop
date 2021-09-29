@@ -9,25 +9,20 @@ parameters get_parameters()
 {
     parameters PAR;
     
-    PAR.init.DataSetType = 2;  // 1-> Quad DataSet  2-> Bebop2 Dataset
+    PAR.init.DataSetType = 1;  //  2-> Bebop2 parameters    
     
-    if (PAR.init.DataSetType == 1) QUADdataset(PAR);
-    if (PAR.init.DataSetType == 2) BEBOPdataset(PAR);
+    if (PAR.init.DataSetType == 1) BEBOPparameters(PAR);
     
 
 
     return PAR;
 }
 
-void BEBOPdataset(parameters &PAR)
+void BEBOPparameters(parameters &PAR)
 {   
-    // 2021-8-4-12-45 -> 72 seconds
-    // 2021-8-4-12-50 -> 94
-    // 2021-8-4-12-54 -> 86.1  good
-    // initial conditions   
-    PAR.init.DataSetFile = "/home/rodrigo/RESEARCH/DataSets/Bebop/2021-8-4-12-54/";
-    PAR.init.run_time = 86.1; // 70
-    PAR.init.GPS_init_yaw = 98*(3.1416/180);  // For aligning GPS points with local coordinates 
+   
+    
+    //PAR.init.GPS_init_yaw = 98*(3.1416/180);  // For aligning GPS points with local coordinates 
     PAR.init.roll_init = 0;
     PAR.init.pitch_init = 0;
     PAR.init.yaw_init = 0*(3.1416/180);  //     
@@ -41,9 +36,9 @@ void BEBOPdataset(parameters &PAR)
 
     PAR.sys.EKF_initialize_anchors = true;
     PAR.sys.EKF_use_anchors_from_GMAP = false;
-    PAR.sys.GMAP_use_anchors_from_EKF = false; // (overwrite EKF_initialize_anchors )
+    PAR.sys.GMAP_use_anchors_from_EKF = true; // (overwrite EKF_initialize_anchors )
     
-    PAR.sys.GMAP_update_optimized_anchors = false;
+    PAR.sys.GMAP_update_optimized_anchors = true;
     PAR.sys.GMAP_optimize_Keyframe_pos = false;
     PAR.sys.GMAP_update_optimized_Keyframe_pos = false; // (overwrite GMAP_optimize_Keyframe_pos )
     

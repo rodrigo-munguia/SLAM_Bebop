@@ -5,17 +5,22 @@ Real-time SLAM for Bebop 2
 Tested in: Ubuntu 18.04
 
 
-Download/install dependencies.  Set their path in Makefile
+Download/install dependencies in the following order, and  set their path in the Makefile
 
 1.- Armadillo C++ library  (tested with version 9.900.2), http://arma.sourceforge.net/
 
-2.- OpenCV (tested with version 4.5), https://opencv.org/
+2.- Eigen  (tested with 3.3.4)      https://eigen.tuxfamily.org/
 
 3.- Ceres Solver (tested with version 2.0)    http://ceres-solver.org/
 
-4.- VISP   (tested with version  3.4.0)     https://visp.inria.fr/
+4.- VTK package (tested with VTK 7.0: sudo apt-get install -y vtk7) Note: do not use VTK installation from source code   
 
-5.- Eigen  (tested with 3.3.4)      https://eigen.tuxfamily.org/
+5.- OpenCV with extra modules installed (opencv_contrib) (tested with OpenCV version 4.5), https://opencv.org/
+    Particularly, SFM and VIZ modules are required (VIZ requires VTK package already installed).  
+
+6.- VISP with Parrot SDK 3  (tested with VISP version  3.4.0)  see: https://visp-doc.inria.fr/doxygen/visp-daily/tutorial-bebop2-vs.html    
+
+
 
 Another dependencies (already included by source code) 
 
@@ -38,7 +43,9 @@ For fresh compiling:
 
 //----------------------------------------------------------------------------------------
 
-To set openplas to run in a single thread,
+In tests, setting the following environment variables has shown to improve performance
+
+To set openblas to run in a single thread,
 configure  the environment variable 
    
    -export OPENBLAS_NUM_THREADS=1

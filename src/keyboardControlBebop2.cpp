@@ -37,6 +37,10 @@ void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool 
 
 void plot_f(PLOT &plot,EKF &ekf,GMAP &gmap,parameters &par,bool &running,LOCKS &locks);
 
+void mapping(GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &running);
+
+void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &running);
+
  
  int main(int argc, char **argv)
  {
@@ -121,6 +125,12 @@ void plot_f(PLOT &plot,EKF &ekf,GMAP &gmap,parameters &par,bool &running,LOCKS &
 
         // init EKF-SLAM thread
         thread th1(ekf_slam,std::ref(ekf),std::ref(gmap),std::ref(cloop),std::ref(par),std::ref(locks),std::ref(running));
+        
+        // init Mapping thread
+        thread th2(mapping,std::ref(gmap),std::ref(par),std::ref(ekf),std::ref(locks),std::ref(running));
+        
+        // init Closing-loop thread
+        thread th3(loop,std::ref(cloop),std::ref(gmap),std::ref(par),std::ref(ekf),std::ref(locks),std::ref(running));
 
         // init Plot thread     
         thread th4(plot_f,std::ref(plot),std::ref(ekf),std::ref(gmap),std::ref(par),std::ref(running),std::ref(locks));
@@ -185,6 +195,8 @@ void plot_f(PLOT &plot,EKF &ekf,GMAP &gmap,parameters &par,bool &running,LOCKS &
        std::cout << "\nQuitting ...\n" << std::endl;
        // Wait for thread t1 to finish     
       th1.join();
+      th2.join();
+      th3.join();
       th4.join();
  
      } else {
@@ -196,12 +208,65 @@ void plot_f(PLOT &plot,EKF &ekf,GMAP &gmap,parameters &par,bool &running,LOCKS &
      return EXIT_FAILURE;
    }
  }
- 
+//-------------------------------------------------------------------------
+// Function thread for loop closing
+//-------------------------------------------------------------------------
+void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &running)
+{
+  
+  cout << "Loop thread running... " << endl;  
+  bool wait = true; 
+  while(wait == true)
+  { 
+    sleep(1);   
+  
+      while(ekf.run == true &&  ekf.Initialized == true)
+        {
+          // gmap.update(locks);
+          if(cloop.newFrame == true && par.sys.closing_loop_active == true)
+          {
+            cloop.update(gmap,locks);           
+          }     
+        }
+    if(running == false)
+    {
+      wait = false;
+    }
+  }      
+
+}
+
+//-------------------------------------------------------------------------
+// Function thread for Mapping using optimization techniques
+//-------------------------------------------------------------------------
+void mapping(GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &running)
+{
+  cout << "Mapping thread running... " << endl;  
+  bool wait = true; 
+  while(wait == true)
+  { 
+    sleep(1);  
+   
+    while(ekf.run == true && ekf.Initialized == true)
+    {
+        if(gmap.closing_loop_active == false )  
+        { 
+            gmap.update(locks);
+        }
+
+    }    
+    if(running == false)
+    {
+      wait = false;
+    }
+  }
+
+  
+}  
 
 //-------------------------------------------------------------------------
 // Function thread for EKF-SLAM
 //-------------------------------------------------------------------------
-
 void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool &running)
 {
 
@@ -215,76 +280,77 @@ void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool 
     double delta_t;
    
     
-  while(running == true)
+  while(running == true) // program is running
   { 
-    sleep(1);
-    while(ekf.run == true)
-    {
+    //sleep(1);
+    while(ekf.run == true)  // ekf is running
+    {            
             
+      auto t_c = std::chrono::high_resolution_clock::now();
             
-            auto t_c = std::chrono::high_resolution_clock::now();
-            
-            // compute delta time-----
-            if (init == false)
-            {
-                delta_t = par.ekf.delta_t;
-                last_time = t_c;
-                init = true;
-            }
-            else
-            {   
-                auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(t_c - last_time);
-                delta_t = elapsed.count() * 1e-9;
-                last_time = t_c;
-            }
-            
-            //------------------------
-            
-            //cout << delta_t << endl;     
-      ekf.prediction(delta_t); // EKF prediction     
-      
-
-      dat = GetData::getDataB();  // Get Measurements           
-      
-      if(dat.data_type == "frame")
-      {     
-            // Start measuring time
-          auto begin = std::chrono::high_resolution_clock::now();             
-
-          ekf.visual_update(&dat.frame,gmap,cloop,locks); // EKF visual update 
-
-          ekf.store_data_for_plot(locks,&dat.frame);
+      // compute delta time-----
+      if (ekf.Initialized == false)
+        { 
           
-           auto end = std::chrono::high_resolution_clock::now();
-           auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+          delta_t = par.ekf.delta_t;
+          last_time = t_c;
+          dat = GetData::getDataB();  // Get Measurements 
+          init = ekf.System_init(dat); // initialize system state
+          //init = true;
+        }
+      else // Until system is initialized
+        { 
           
-         std::printf("Time per frame: %.5f seconds.  ", elapsed.count() * 1e-9);
-         cout << "n feats: " << ekf.FeatsDATA.size() << "  n anchors: " << ekf.AnchorsDATA.size() ;
-         cout << "  x: " << ekf.x(7) << "  y:" << ekf.x(8) << "  z:" << ekf.x(9) << endl;       
-        
-        //cout << "frame" <<  " range: " << dat.frame.range << "  range type: " << dat.frame.range_type << endl;
-      }
-      if(dat.data_type == "alt")
-      {
-          ekf.altitude_update_alt(dat.alt);  
-        //cout << "altitude: " << dat.alt.altitude << endl;
-      }
-      if(dat.data_type == "speed")
-      {
-         
-         ekf.speed_update(dat.speed);
-        // cout << "speedX: " << dat.speed.speedX << " speedY: " << dat.speed.speedY << " speedZ:" << dat.speed.speedZ << endl;
 
-         // cout << "  x: " << ekf.x(7) << "  y:" << ekf.x(8) << "  z:" << ekf.x(9) << endl;     
+          auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(t_c - last_time);
+          delta_t = elapsed.count() * 1e-9;
+          last_time = t_c;
+           
+          ekf.prediction(delta_t); // EKF prediction              
 
-      }
-      if(dat.data_type == "attitude")
-      {
-       
-        ekf.attitude_update(dat.att);
-        // cout << "roll: " << dat.att.roll << " pitch: " << dat.att.pitch << " yaw:" << dat.att.yaw << endl;
+          dat = GetData::getDataB();  // Get Measurements           
+          
+          if(dat.data_type == "frame")
+          {     
+                // Start measuring time
+              auto begin = std::chrono::high_resolution_clock::now();             
 
-      }
+              ekf.visual_update(&dat.frame,gmap,cloop,locks); // EKF visual update 
+
+              ekf.store_data_for_plot(locks,&dat.frame);
+              
+              auto end = std::chrono::high_resolution_clock::now();
+              auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+
+            //std::printf("Time per frame: %.5f seconds.  ", elapsed.count() * 1e-9);
+              
+              //cout << "n feats: " << ekf.FeatsDATA.size() << "  n anchors: " << ekf.AnchorsDATA.size() ;
+              //cout << "  x: " << ekf.x(7) << "  y:" << ekf.x(8) << "  z:" << ekf.x(9) << endl;       
+            
+            //cout << "frame" <<  " range: " << dat.frame.range << "  range type: " << dat.frame.range_type << endl;
+
+          }
+          if(dat.data_type == "alt")
+          {
+              ekf.altitude_update_alt(dat.alt);  
+            //cout << "altitude: " << dat.alt.altitude << endl;
+          }
+          if(dat.data_type == "speed")
+          {            
+            ekf.speed_update(dat.speed);
+            // cout << "speedX: " << dat.speed.speedX << " speedY: " << dat.speed.speedY << " speedZ:" << dat.speed.speedZ << endl;
+            // cout << "  x: " << ekf.x(7) << "  y:" << ekf.x(8) << "  z:" << ekf.x(9) << endl;
+
+          }
+          if(dat.data_type == "attitude")
+          {          
+            ekf.attitude_update(dat.att);
+            //cout << "roll: " << dat.att.roll << " pitch: " << dat.att.pitch << " yaw:" << dat.att.yaw << endl;
+            //cout << ekf.yaw_at_home << endl;
+          }
+
+        } // else (init ==true)
+
 
        
     }
@@ -297,29 +363,25 @@ void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool 
 void plot_f(PLOT &plot, EKF &ekf,GMAP &gmap,parameters &par,bool &running,LOCKS &locks)
 {
 
-   cout << "Plot thread running... " << endl;
-
-  
+  cout << "Plot thread running... " << endl;  
   bool wait = true; 
   while(wait == true)
   { 
     sleep(1);  
-    if(ekf.run== true)
+    if(ekf.Initialized== true)
     {
        wait = false;
-    }   
-
+    }
     if(running == false)
     {
       wait = false;
-    }     
-
+    }
   }
 
   
   
 
-  if(ekf.run== true)
+  if(ekf.Initialized== true)
    {
    plot.init(ekf,gmap,locks,running);
    }

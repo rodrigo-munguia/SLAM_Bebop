@@ -46,11 +46,13 @@ class EKF
             PAR = par;
 
             x.resize(13);
-            P.resize(13,13); 
+            P.resize(13,13);
+
+            Initialized = false; 
             
             
         }
-        void state_init();
+        bool System_init(DATA &dat);
 
         void prediction(double delta_t);
 
@@ -76,7 +78,8 @@ class EKF
 
         void store_data_for_plot(LOCKS &locks,FRAME *frame); 
 
-        STORE store; 
+        STORE store;
+         
 
     private:
         parameters PAR;
@@ -87,11 +90,13 @@ class EKF
         vectorFeat AnchorsDATA;
 
         std::vector<cv::Point3f> EKFmap;
-        std::vector<cv::Vec3b> EKFmap_color;    
+        std::vector<cv::Vec3b> EKFmap_color; 
 
+        bool Initialized;
         
+        double yaw_at_home; 
 
- 
+        CamPose Init_cam_position; 
 
     
 };

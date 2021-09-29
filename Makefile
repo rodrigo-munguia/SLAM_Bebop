@@ -50,7 +50,7 @@ EIGEN_SRC_DIR := /usr/include/eigen3 # The place you unpacked or cloned Eigen.
 
 #-------------------------------------------------------------------------------------------
 # bebopcampure (this app)
-LIB_DEPENDENCIES := -lpthread
+LIB_DEPENDENCIES := -lpthread -lboost_system -lboost_thread
 LIB_DEPENDENCIES_DIR := /usr/local/lib 
 LIB_DIR := lib
 LIB_INCLUDE := include

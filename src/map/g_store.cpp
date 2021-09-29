@@ -47,7 +47,7 @@ locks.ReadGlobalMAP_mtx.lock();
           cv::Vec3f  t_c;
           t_c(0) = KeyFDATA[i].CameraPos(0);
           t_c(1) = -KeyFDATA[i].CameraPos(1);
-          t_c(2) = KeyFDATA[i].CameraPos(2);
+          t_c(2) = -KeyFDATA[i].CameraPos(2);
           //cv::Matx33f R = cv::Mat(3,3,CV_64FC1,Rn2c_a);
           cv::Mat R = cv::Mat(3,3,CV_64FC1,Rn2c_a);
           cv::Mat Rb = (cv::Mat_<double>(3,3) << 1, 0, 0, 0, -1, 0, 0, 0, -1);
@@ -58,14 +58,7 @@ locks.ReadGlobalMAP_mtx.lock();
     }        
 
 
-
-
-
-
-
 locks.ReadGlobalMAP_mtx.unlock();
-
-
 
 
 }

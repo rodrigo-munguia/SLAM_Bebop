@@ -46,7 +46,8 @@ struct EKF_par
     double min_vel_init_feats;
     double min_vel_update_feats;
     int min_n_pred_feats_for_init;
-    int max_n_feats_for_init; 
+    int max_n_feats_for_init;
+    
 
 };
 
@@ -186,8 +187,8 @@ struct parameters
 //------------------------------------------------------------------------
 // set parameters 
 
-void QUADdataset(parameters &PAR);
-void BEBOPdataset(parameters &PAR);
+void QUADparameters(parameters &PAR);
+void BEBOPparameters(parameters &PAR);
 
 parameters get_parameters();
 

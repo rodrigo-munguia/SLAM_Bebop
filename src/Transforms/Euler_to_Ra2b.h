@@ -19,6 +19,8 @@
 // Function Declarations
 void Euler_to_Ra2b(double roll, double pitch, double yaw, double Ra2b[9]);
 
+void Ra2b_to_Euler(double &roll, double &pitch, double &yaw, double Ra2b[9]);
+
 #endif
 
 //

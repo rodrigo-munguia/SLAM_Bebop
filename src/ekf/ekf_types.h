@@ -23,7 +23,18 @@ struct MatchInfo
     int n_matched_feats;
     int n_predicted_img_anchors;
     int n_matched_anchors;
-}; 
+};
+
+struct CamPose
+{
+     double axis_x;
+     double axis_y;
+     double axis_z;
+     double x;
+     double y;
+    double z; 
+
+};
 
 struct FEAT
 {

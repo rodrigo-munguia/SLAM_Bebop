@@ -4,12 +4,24 @@
 #include <opencv2/viz.hpp>
 
 
-void EKF::state_init()
+bool EKF::System_init(DATA &dat)
 {
+    
 
-    system_init(x,P,PAR);
-    FeatsDATA.clear();
-    AnchorsDATA.clear();
+    bool init = system_init(x,P,PAR,dat,yaw_at_home,Init_cam_position);
+
+    if (init == true)
+    {
+        FeatsDATA.clear();
+        AnchorsDATA.clear(); 
+        Initialized = true;       
+        return true;
+    }
+    else
+    {   
+        Initialized = false;
+        return false;     
+    }    
 
 }
 
@@ -99,7 +111,11 @@ void EKF::speed_update(SPD &speed)
 
 void EKF::attitude_update(ATT &att)
 {
-    Attitude_Update(x,P,att,PAR);
+    //Attitude_Update(x,P,att,PAR,yaw_at_home);
+
+  // Attitude_Update_2(x,P,att,PAR,yaw_at_home,Init_cam_position);
+
+   Attitude_Update_3(x,P,att,PAR,yaw_at_home,Init_cam_position);
 }
 
 void EKF::store_data_for_plot(LOCKS &locks,FRAME *frame)

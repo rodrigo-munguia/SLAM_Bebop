@@ -147,27 +147,43 @@ void StopSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks)
 
   locks.ekf_run_mtx.lock();    
     ekf.run = false;
+    ekf.Initialized = false; // Every time SLAM is stoped, the system must be reinitialized    
   locks.ekf_run_mtx.unlock();
 
 }
 void StartSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks)
 {
-  std::cout << "Initializing SLAM.." << std::endl;
-
-  double bebop_cam_tilt_deg = drone.getCurrentCameraTilt(); 
   
+
+  double bebop_cam_tilt_deg = drone.getCurrentCameraTilt();                               
+  
+  //bebop_cam_tilt_deg = -45;
+
   std::cout << "Camera tilt: " << bebop_cam_tilt_deg << std::endl;
   double ekf_camera_tilt_rad = (bebop_cam_tilt_deg + 90)*(3.1416/180);
 
-  par.init.roll_init = ekf_camera_tilt_rad;
+  ekf.Init_cam_position.axis_x = ekf_camera_tilt_rad;
+  //ekf.Init_cam_position.axis_x = 45*(3.1416/180);       
+  
+  //ekf.Init_cam_position.axis_y = par.init.roll_init;
+  ekf.Init_cam_position.axis_y = 0; 
+  //ekf.Init_cam_position.axis_z = par.init.yaw_init;
+  ekf.Init_cam_position.axis_z = 0;
+  
+  ekf.Init_cam_position.x = par.init.x_init;
+  ekf.Init_cam_position.y = par.init.y_init;
+  ekf.Init_cam_position.z = par.init.z_init;
 
 
+  std::cout << "Initializing EKF-SLAM.." << std::endl;
+  
   locks.ekf_run_mtx.lock();    
     ekf.run = false;
+    ekf.Initialized = false; // Every time SLAM is started, the system must be reinitialized
   locks.ekf_run_mtx.unlock();
      sleep(1); // give time to finish the last ekf loop  
 
-    ekf.state_init(); // initialize system state
+    //ekf.state_init(); // initialize system state
   
     ekf.run = true;
   

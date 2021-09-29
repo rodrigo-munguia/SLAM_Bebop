@@ -27,9 +27,7 @@ void speed_Update(arma::vec& x, arma::mat& P,SPD &speed,parameters &par)
 
     arma::vec::fixed<3> s_c = x.subvec(10,12); // (velocity) speed vector in vnavigation frame
     
-    arma::vec::fixed<3> h = Rn2c*s_c;  // measurement prediction
-
-    
+    arma::vec::fixed<3> h = Rn2c*s_c;  // measurement prediction    
 
     //--------------- Measurement Jacobian
     int x_len = x.size();

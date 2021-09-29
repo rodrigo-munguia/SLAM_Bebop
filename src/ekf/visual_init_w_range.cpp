@@ -47,7 +47,7 @@ void visual_init_w_range(arma::vec& x, arma::mat& P, parameters &par,FRAME *fram
     int numRetPoints;
     if (FeatsDATA.size() > 0 )
     {
-        numRetPoints = 50; //choose exact number of return points
+        numRetPoints = 100; //choose exact number of return points
     }
     else
     {

@@ -176,7 +176,12 @@ void PLOT::init(EKF &ekf,GMAP &gmap,LOCKS &locks,bool &running)
          std::vector<cv::Affine3d> path = gmap.store.path;
       locks.ReadGlobalMAP_mtx.unlock(); 
    
-   
+  
+  // set a longer focal to approximate orthogonal view
+  //viz::Camera cam = viewer.getCamera();
+  //cv::Size ws = cam.getWindowSize();  
+  //viz::Camera camO(10000,10000,ws.width/2,ws.height/2,cv::Size(ws.width,ws.height));
+  //viewer.setCamera(camO);
 
    //----------------------------------------------------------------------------------------------------------
    // Main plot loop
@@ -334,6 +339,8 @@ void PLOT::init(EKF &ekf,GMAP &gmap,LOCKS &locks,bool &running)
         {
         viz::WTrajectoryFrustums cam_pose(pose, Vec2f(0.889484, 0.523599), 0.2,viz::Color::white());
         viewer.showWidget("camera", cam_pose);
+        viz::WTrajectory cam_c(pose,cv::viz::WTrajectory::FRAMES,.25,cv::viz::Color::blue());
+        viewer.showWidget("cam_f",cam_c);
         }
       }  
 
