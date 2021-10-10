@@ -211,7 +211,7 @@ void GMAP::local_bundle_ajustment2(LOCKS &locks)
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);      
     //std::cout << summary.FullReport() << "\n";
-    cout << "Optimization!!" << endl;
+    //cout << "Optimization!!" << endl;
    
    // Vgraph.print();
 

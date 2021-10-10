@@ -1,0 +1,7 @@
+takeoff
+pointa,0,.5,1,0
+pointr,0,-.5,0,0
+pointa,-.5,.5,1,0
+pointa,-.5,0,1,0
+pointa,0,0,1,0
+land

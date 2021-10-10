@@ -14,6 +14,7 @@ struct LOCKS
     std::mutex Pull_NewAnchorsDATA_mtx;
     std::mutex update_anchors_mtx;
     std::mutex ReadGlobalMAP_mtx;
+    std::mutex Set_robot_state_mtx;
 
 };
 

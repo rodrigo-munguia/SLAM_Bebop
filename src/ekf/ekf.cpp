@@ -13,7 +13,8 @@ bool EKF::System_init(DATA &dat)
     if (init == true)
     {
         FeatsDATA.clear();
-        AnchorsDATA.clear(); 
+        AnchorsDATA.clear();
+        z_yaw = yaw_at_home; 
         Initialized = true;       
         return true;
     }
@@ -54,31 +55,35 @@ void EKF::visual_update(FRAME *frame,GMAP &gmap,LOOP &cloop,LOCKS &locks)
 
     }
 
-    if (frame->range > 0) // if range measurement is associated with the frame
-    {   
-
-        if ((FeatsDATA.size() == 0)&&(v > PAR.ekf.min_vel_start_init))
-        {  
-            // add features for the first time
-            visual_init_w_range(x,P,PAR,frame,FeatsDATA,AnchorsDATA); // for the first time
-        }
-        if ((FeatsDATA.size()>0)&&(FeatsDATA.size() < PAR.ekf.max_n_feats_for_init)&& v > PAR.ekf.min_vel_init_feats)            
-        {  
-          // initialize new features  
-           visual_init_w_range(x,P,PAR,frame,FeatsDATA,AnchorsDATA);
-        }
-        last_range = frame->range;
-    }
-    else
+    
+    if(x(9) < -.5) // only try to initialize visual features if altitude is above some treshold
     {
-        if(FeatsDATA.size()>0 && Mi.n_predicted_img_feats < PAR.ekf.min_n_pred_feats_for_init && last_range >0 && v > PAR.ekf.min_vel_init_feats)
+        if (frame->range > 0) // if range measurement is associated with the frame
         {   
-            // if the number of predicted feats to appear in the image, initialize new feats using the last range as initial depth
-            frame->range = last_range;
-            visual_init_w_range(x,P,PAR,frame,FeatsDATA,AnchorsDATA);   
 
+            if ((FeatsDATA.size() == 0)&&(v > PAR.ekf.min_vel_start_init))
+            {  
+                // add features for the first time
+                visual_init_w_range(x,P,PAR,frame,FeatsDATA,AnchorsDATA); // for the first time
+            }
+            if ((FeatsDATA.size()>0)&&(FeatsDATA.size() < PAR.ekf.max_n_feats_for_init)&& v > PAR.ekf.min_vel_init_feats)            
+            {  
+            // initialize new features  
+            visual_init_w_range(x,P,PAR,frame,FeatsDATA,AnchorsDATA);
+            }
+            last_range = frame->range;
         }
-    }
+        else
+        {
+            if(FeatsDATA.size()>0 && Mi.n_predicted_img_feats < PAR.ekf.min_n_pred_feats_for_init && last_range >0 && v > PAR.ekf.min_vel_init_feats)
+            {   
+                // if the number of predicted feats to appear in the image, initialize new feats using the last range as initial depth
+                frame->range = last_range;
+                visual_init_w_range(x,P,PAR,frame,FeatsDATA,AnchorsDATA);   
+
+            }
+        }
+    }    
     
     
 
@@ -111,9 +116,7 @@ void EKF::speed_update(SPD &speed)
 
 void EKF::attitude_update(ATT &att)
 {
-    //Attitude_Update(x,P,att,PAR,yaw_at_home);
-
-  // Attitude_Update_2(x,P,att,PAR,yaw_at_home,Init_cam_position);
+   
 
    Attitude_Update_3(x,P,att,PAR,yaw_at_home,Init_cam_position);
 }

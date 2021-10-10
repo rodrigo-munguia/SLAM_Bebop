@@ -20,8 +20,11 @@
  #include "locks.h"
  #include "parameters.h"
  #include "plot.h"
+ #include "control/control.h"
+ #include "Transforms/AngleWrap.h"
 
  #include <iostream>
+ #include <unistd.h>
   
  
 
@@ -33,7 +36,7 @@
  bool handleKeyboardInput(vpRobotBebop2 &drone, int key);
 */
 
-void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool &running);
+void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,CONTROL &control,parameters &par,LOCKS &locks,bool &running);
 
 void plot_f(PLOT &plot,EKF &ekf,GMAP &gmap,parameters &par,bool &running,LOCKS &locks);
 
@@ -41,7 +44,9 @@ void mapping(GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &running);
 
 void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &running);
 
- 
+void control_t(CONTROL &control,vpRobotBebop2 &drone,EKF &ekf,LOCKS &locks,bool &running, bool &stop_control);
+
+
  int main(int argc, char **argv)
  {
    try {
@@ -107,8 +112,10 @@ void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &ru
         par = get_parameters(); // get parameters structure
         EKF ekf(par); // create EKF-SLAM object  
         GMAP gmap(par); // create Global MAP object
-        LOOP cloop(par); // create Closing loop opbject
-        PLOT plot(par);
+        LOOP cloop(par); // create Closing loop object
+        PLOT plot(par); // create plotting object
+        CONTROL control(par); // create control
+
 
         GetData data;   // set callbacks
         drone._navdata->SetReceivedRangeCallback(&data.ReceiveRangeCallBack); 
@@ -118,13 +125,14 @@ void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &ru
         drone.SetReceivedAttitudeCallback(&data.ReceiveAttitudeCallback);
         
         
-       
-      int k = 0;
+        // global variables
+        int k = 0;
         bool running = true;
         ekf.run = false;
+        bool stop_control = false;
 
         // init EKF-SLAM thread
-        thread th1(ekf_slam,std::ref(ekf),std::ref(gmap),std::ref(cloop),std::ref(par),std::ref(locks),std::ref(running));
+        thread th1(ekf_slam,std::ref(ekf),std::ref(gmap),std::ref(cloop),std::ref(control),std::ref(par),std::ref(locks),std::ref(running));
         
         // init Mapping thread
         thread th2(mapping,std::ref(gmap),std::ref(par),std::ref(ekf),std::ref(locks),std::ref(running));
@@ -134,8 +142,10 @@ void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &ru
 
         // init Plot thread     
         thread th4(plot_f,std::ref(plot),std::ref(ekf),std::ref(gmap),std::ref(par),std::ref(running),std::ref(locks));
-       
-
+        
+        // init Control thread
+        thread th5(control_t,std::ref(control),std::ref(drone),std::ref(ekf),std::ref(locks),std::ref(running),std::ref(stop_control));        
+        
        
  
        std::cout << "\nConfiguring drone settings ...\n" << std::endl;
@@ -180,7 +190,7 @@ void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &ru
          {
            k = keyboard.getchar();
          }
-         running = handleKeyboardInput(drone, k,ekf,locks,par);
+         running = handleKeyboardInput(drone, k,ekf,locks,par,gmap,cloop,control,stop_control);
          
 
           #ifdef VISP_HAVE_FFMPEG
@@ -192,12 +202,18 @@ void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &ru
        }
        ekf.run = false;
        //---------------------------------------------------------------------
-       std::cout << "\nQuitting ...\n" << std::endl;
-       // Wait for thread t1 to finish     
+      
+      
+      std::cout << "\nQuitting ...\n" << std::endl;
+       // Wait for thread t1 to finish 
+      
       th1.join();
       th2.join();
       th3.join();
       th4.join();
+      th5.join();
+      
+      
  
      } else {
        std::cout << "ERROR : failed to setup drone control." << std::endl;
@@ -208,31 +224,76 @@ void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &ru
      return EXIT_FAILURE;
    }
  }
+
+
+//-------------------------------------------------------------------------
+// Function thread for loop closing
+//-------------------------------------------------------------------------
+void control_t(CONTROL &control,vpRobotBebop2 &drone,EKF &ekf,LOCKS &locks,bool &running, bool &stop_control)
+{
+  
+  cout << "-> Control thread running... " << endl;  
+  bool wait = true; 
+  while(wait == true)
+  { 
+    sleep(1);  
+    if(ekf.Initialized== true)
+    {
+       wait = false;
+    }
+    if(running == false)
+    {
+      wait = false;
+    }
+  }
+
+  if(ekf.Initialized== true)
+   { 
+
+     cout << "-> Control loop running... " << endl;
+     control.Init_cam_position_axis_x = ekf.Init_cam_position.axis_x;  
+     control.init_control_loop(locks,running,stop_control,drone);     
+   
+   }
+
+   
+  cout << "-> Control thread finished" << endl;
+}
+
+
 //-------------------------------------------------------------------------
 // Function thread for loop closing
 //-------------------------------------------------------------------------
 void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &running)
 {
   
-  cout << "Loop thread running... " << endl;  
+  cout << "-> Loop thread running... " << endl;  
   bool wait = true; 
+  
   while(wait == true)
   { 
-    sleep(1);   
-  
+    //usleep(10000); 
+    sleep(1);  
+
       while(ekf.run == true &&  ekf.Initialized == true)
         {
           // gmap.update(locks);
           if(cloop.newFrame == true && par.sys.closing_loop_active == true)
           {
             cloop.update(gmap,locks);           
-          }     
+          }
+          usleep(10000);     
         }
+    //cout << "xxx" << endl;    
     if(running == false)
     {
       wait = false;
+      
+      
     }
-  }      
+  }  
+
+  cout << "-> Closing-loop thread finished" << endl;    
 
 }
 
@@ -241,7 +302,7 @@ void loop(LOOP &cloop, GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &ru
 //-------------------------------------------------------------------------
 void mapping(GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &running)
 {
-  cout << "Mapping thread running... " << endl;  
+  cout << "-> Mapping thread running... " << endl;  
   bool wait = true; 
   while(wait == true)
   { 
@@ -258,19 +319,21 @@ void mapping(GMAP &gmap,parameters &par,EKF &ekf,LOCKS &locks,bool &running)
     if(running == false)
     {
       wait = false;
+      usleep(10000);     
     }
   }
-
+  
+  cout << "-> Mapping thread finished" << endl;
   
 }  
 
 //-------------------------------------------------------------------------
 // Function thread for EKF-SLAM
 //-------------------------------------------------------------------------
-void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool &running)
+void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,CONTROL &control,parameters &par,LOCKS &locks,bool &running)
 {
 
-    cout << "EKF-SLAM thread running... " << endl;   
+    cout << "-> EKF-SLAM thread running... " << endl;   
 
     DATA dat;
     
@@ -278,6 +341,7 @@ void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool 
     auto last_time = std::chrono::high_resolution_clock::now();
     bool init = false;
     double delta_t;
+    
    
     
   while(running == true) // program is running
@@ -306,7 +370,11 @@ void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool 
           delta_t = elapsed.count() * 1e-9;
           last_time = t_c;
            
-          ekf.prediction(delta_t); // EKF prediction              
+          ekf.prediction(delta_t); // EKF prediction  
+
+          //locks.Set_robot_state_mtx.lock();
+            control.set_robot_state(ekf.x(7),ekf.x(8),ekf.x(9),ekf.z_yaw);            
+          //locks.Set_robot_state_mtx.unlock();
 
           dat = GetData::getDataB();  // Get Measurements           
           
@@ -346,7 +414,12 @@ void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool 
           {          
             ekf.attitude_update(dat.att);
             //cout << "roll: " << dat.att.roll << " pitch: " << dat.att.pitch << " yaw:" << dat.att.yaw << endl;
-            //cout << ekf.yaw_at_home << endl;
+            
+            // Set the yaw measurement for control
+            ekf.z_yaw = dat.att.yaw + ekf.yaw_at_home;  //  use local yaw measurements
+            AngleWrap(ekf.z_yaw );
+
+            //cout << ekf.z_yaw << endl;
           }
 
         } // else (init ==true)
@@ -357,13 +430,15 @@ void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,parameters &par,LOCKS &locks,bool 
 
   }  
 
+  cout << "-> EKF thread finished" << endl;
+
 }
 
 //--------------------------------------------------------------------
 void plot_f(PLOT &plot, EKF &ekf,GMAP &gmap,parameters &par,bool &running,LOCKS &locks)
 {
 
-  cout << "Plot thread running... " << endl;  
+  cout << "-> Plot thread running... " << endl;  
   bool wait = true; 
   while(wait == true)
   { 
@@ -377,24 +452,15 @@ void plot_f(PLOT &plot, EKF &ekf,GMAP &gmap,parameters &par,bool &running,LOCKS 
       wait = false;
     }
   }
-
-  
   
 
   if(ekf.Initialized== true)
    {
-   plot.init(ekf,gmap,locks,running);
+      cout << "-> Plot loop running... " << endl; 
+      plot.init(ekf,gmap,locks,running);
+  
    }
 
-  // sleep(1);
-
-
- // while(running == true)
- // { 
-    // while(!plot.viewer->wasStopped())
-       // plot.Update(ekf,gmap,par,running);
-    
- // }
-
+  cout << "-> Plot thread finished" << endl;
 
 }

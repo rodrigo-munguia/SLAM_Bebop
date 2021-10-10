@@ -19,7 +19,7 @@ bool check_matches(KEYFRAME Current_KF,vectorKeyF &KeyFDATA,int idx_indirect_lin
 
 bool get_measured_position_of_current_KF(KEYFRAME Current_KF, std::vector<MATCH> &match_idx,vectorFeat AnchorsDATA,parameters &par, arma::vec::fixed<3>  &z_pos,GMAP &gmap );
 
-void update_gmap(KEYFRAME Current_KF, std::vector<MATCH> &match_idx,GMAP &gmap,parameters &par, arma::vec::fixed<3> z_pos_w ,LOCKS &locks);
+void update_gmap(KEYFRAME Current_KF, std::vector<MATCH> &match_idx,GMAP &gmap,parameters &par, arma::vec::fixed<3> z_pos_w ,LOCKS &locks, int &idx_last_KF_optimized);
 
 
 //------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ void LOOP::update(GMAP &gmap,LOCKS &locks)
                 
                 locks.update_anchors_mtx.lock();
                 // update global map
-                    update_gmap(this->Current_KF, matches_idx,gmap,PAR, xyz_pos ,locks);
+                    update_gmap(this->Current_KF, matches_idx,gmap,PAR, xyz_pos ,locks, idx_last_KF_optimized);
                    
                     
                     gmap.Full_update_VG = true; // tell to the global map procces to fully update the visibility graph
@@ -102,7 +102,7 @@ void LOOP::update(GMAP &gmap,LOCKS &locks)
   return new_pos_measurement;
  }
 //-------------------------------------------------------------------------------------
-void update_gmap(KEYFRAME Current_KF, std::vector<MATCH> &match_idx,GMAP &gmap,parameters &par, arma::vec::fixed<3> z_pos_w ,LOCKS &locks)
+void update_gmap(KEYFRAME Current_KF, std::vector<MATCH> &match_idx,GMAP &gmap,parameters &par, arma::vec::fixed<3> z_pos_w ,LOCKS &locks, int &idx_last_KF_optimized)
 {
   
   // get the KeyFrame index that has the most matches
@@ -124,7 +124,7 @@ void update_gmap(KEYFRAME Current_KF, std::vector<MATCH> &match_idx,GMAP &gmap,p
   std::vector<double> z_ab;
   std::vector<double> xy_ab;
   
-   // fill first parameter vector to actual position
+   // fill first parameter vector 
    xy_ab.push_back(gmap.KeyFDATA[0].CameraPos(0));  // x_a
    xy_ab.push_back(gmap.KeyFDATA[0].CameraPos(1));  // y_a
   
@@ -219,11 +219,21 @@ void update_gmap(KEYFRAME Current_KF, std::vector<MATCH> &match_idx,GMAP &gmap,p
 
   //- set constant the initial position parameter block  
      double *c1 = pos;
-   problem.SetParameterBlockConstant(c1);
+     problem.SetParameterBlockConstant(c1);
+
+  if (idx_last_KF_optimized > 1)  
+  {
+    // set constant the position of i-KF optimized in previous closing loop process
+    for (int i = 1; i <= idx_last_KF_optimized ; i++ )
+    {
+      double *kf_c = pos + 2*i;
+      problem.SetParameterBlockConstant(kf_c);
+    }
+
+  } 
 
   
-  
-  
+  idx_last_KF_optimized = gmap.KeyFDATA.size()-1;  // last kF to be taken into account by the graph-slam
   
   // --- Solve graph-SLAM optimization problem 
   ceres::Solver::Options options;   
@@ -404,8 +414,16 @@ bool get_measured_position_of_current_KF(KEYFRAME Current_KF, std::vector<MATCH>
         {  
           int Descriptor_idx_m1 = matches_p[j].queryIdx; // get index of the descriptor in 
           int Descriptor_idx_m2 = matches_p[j].trainIdx; // get index of the descriptor in 
-          cv::Point2f point_idx_m1 =  Current_KF.keyPoints[Descriptor_idx_m2].pt;
-          cv::Point2f point_idx_m2 = AnchorsDATA[Descriptor_idx_m1].Keypoint.pt;
+          
+          cv::Point2f point_idx_m1,point_idx_m2;
+          if(Current_KF.keyPoints.size() >= Descriptor_idx_m2)
+              {
+                point_idx_m1 =  Current_KF.keyPoints[Descriptor_idx_m2].pt;
+              }
+          if(AnchorsDATA.size() >= Descriptor_idx_m1)
+              {    
+                point_idx_m2 = AnchorsDATA[Descriptor_idx_m1].Keypoint.pt;
+              }
           
           Points_m2.push_back(point_idx_m1);
           Points_m1.push_back(point_idx_m2); 

@@ -27,19 +27,28 @@ class LOOP
             PAR = par;
             newFrame = false;
             closing_loop_active = false;
-            new_xy_position_available = false;          
-            
+            new_xy_position_available = false; 
+            idx_last_KF_optimized = 0;            
         }
+
+        void reset()
+        {
+            newFrame = false;
+            closing_loop_active = false;
+            new_xy_position_available = false; 
+            idx_last_KF_optimized = 0;             
+
+        }
+
+
+
 
         
         void update(GMAP &gmap,LOCKS &locks);
        
-        
-        bool newFrame;
         KEYFRAME Current_KF;
-
+        bool newFrame;        
         bool closing_loop_active;
-
         bool new_xy_position_available;
 
         arma::vec::fixed<2> get_new_xy_pos();
@@ -47,10 +56,9 @@ class LOOP
     private:
 
        arma::vec::fixed<2> new_pos_measurement;
-       
+       int idx_last_KF_optimized;      
 
-
-        parameters PAR;    
+       parameters PAR;    
         
 
         

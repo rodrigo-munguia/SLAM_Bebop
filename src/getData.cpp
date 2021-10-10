@@ -15,9 +15,9 @@ static void GetData::ReceiveSpeedCallback(float speedX,float speedY,float speedZ
   DATA dat;
   dat.speed.time = ms;
   dat.data_type = "speed";
-  dat.speed.speedX = -speedX;
-  dat.speed.speedY = -speedY;
-  dat.speed.speedZ = -speedZ;
+  dat.speed.speedX = speedX;
+  dat.speed.speedY = speedY;
+  dat.speed.speedZ = speedZ;
 
   mutex_dat.lock(); 
     ManageBuffer(dat);

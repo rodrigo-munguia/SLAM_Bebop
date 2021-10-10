@@ -54,9 +54,9 @@ struct EKF_par
 struct INIT
 {
     int x_len;
-    double roll_init;
-    double pitch_init;
-    double yaw_init;
+    double axis_x_init;
+    double axis_y_init;
+    double axis_z_init;
     double x_init;
     double y_init;
     double z_init;
@@ -168,6 +168,23 @@ struct PLOT_3D
 
 };
 
+
+// Control
+struct CONTROL_par
+{
+  float MaxVel_xy;
+  float MaxVel_z;
+  float MaxVel_yaw;
+  float Max_error_xyz_reach_p;
+  float Max_error_yaw_reach_p;
+  double kx;
+  double ky;
+  double kz;
+  double kyaw;
+
+
+};
+
 // main structure of parameters
 struct parameters
 {
@@ -179,6 +196,7 @@ struct parameters
     SYSTEM sys;
     CLOSE_LOOP close_loop;
     PLOT_3D plot_3D;
+    CONTROL_par control;
 };
 
 

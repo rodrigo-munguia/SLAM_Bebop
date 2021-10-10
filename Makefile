@@ -66,7 +66,8 @@ CPPsrc = $(wildcard src/*.cpp) \
 		 $(wildcard src/vision/*.cpp) \
 		 $(wildcard src/map/*.cpp) \
 		 $(wildcard src/anms/*.cpp)  \
-		 $(wildcard src/loop/*.cpp)
+		 $(wildcard src/loop/*.cpp)  \
+		 $(wildcard src/control/*.cpp)
 		 
 
 

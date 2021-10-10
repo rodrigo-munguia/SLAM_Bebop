@@ -16,9 +16,9 @@
 //-----------------------------------------------------------------------------  
 typedef std::vector<double> vec_t;
 
-void Attitude_Update(arma::vec& x, arma::mat& P,ATT &att,parameters &par,double &yaw_at_home);
+//void Attitude_Update(arma::vec& x, arma::mat& P,ATT &att,parameters &par,double &yaw_at_home);
 
-void Attitude_Update_2(arma::vec& x, arma::mat& P,ATT &att,parameters &par,double &yaw_at_home, CamPose &Init_cam_position );
+//void Attitude_Update_2(arma::vec& x, arma::mat& P,ATT &att,parameters &par,double &yaw_at_home, CamPose &Init_cam_position );
 
 void Attitude_Update_3(arma::vec& x, arma::mat& P,ATT &att,parameters &par,double &yaw_at_home, CamPose &Init_cam_position );
 

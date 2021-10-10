@@ -1,5 +1,6 @@
 #include "attitude_update.h"
 #include <cmath>
+#include "../Transforms/AngleWrap.h"
 
 
 struct Quaternion {
@@ -33,25 +34,8 @@ EulerAngles ToEulerAngles(Quaternion q) {
     return angles;
 }
 
-void AngleWrap(double &a)
-{
-   if( a > 3.1416)
-   {
-       a = a- 2*3.1416;
-   }
-   if( a < -3.1416)
-   {
-       a = a + 2*3.1416;
-   }
-   if (a == 3.1416)
-   {
-       a = a;
-   }
-   
-}
 
-
-
+/*
 void Attitude_Update(arma::vec& x, arma::mat& P,ATT &att,parameters &par, double &yaw_at_home)
 {
   
@@ -150,9 +134,9 @@ void Attitude_Update(arma::vec& x, arma::mat& P,ATT &att,parameters &par, double
 
 
 }
-
+*/
 //-------------------------------------------------------------------------------
-
+/*
 void Attitude_Update_2(arma::vec& x, arma::mat& P,ATT &att,parameters &par, double &yaw_at_home, CamPose &Init_cam_position )
 {
 
@@ -331,11 +315,11 @@ void Attitude_Update_2(arma::vec& x, arma::mat& P,ATT &att,parameters &par, doub
 
 }
 
-
+*/
 
 //-------------------------------------------------------------------------------
 
-void Attitude_Update_3(arma::vec& x, arma::mat& P,ATT &att,parameters &par, double &yaw_at_home, CamPose &Init_cam_position )
+void Attitude_Update_3(arma::vec& x, arma::mat& P,ATT &att,parameters &par, double &yaw_at_home,  CamPose &Init_cam_position)
 {
 
      arma::vec::fixed<4> z;  // quat measurement

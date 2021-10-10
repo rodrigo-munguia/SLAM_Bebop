@@ -69,7 +69,7 @@ void BEBOPparameters(parameters &PAR)
     PAR.ekf.sigma_sp = .001;  // speed measurment noise
     PAR.ekf.sigma_att_update = .01;
     
-    PAR.ekf.min_vel_start_init = .1; // m/s , Minimun x-y velocity for starting the initialization proccess of ekf feats
+    PAR.ekf.min_vel_start_init = .2; // m/s , Minimun x-y velocity for starting the initialization proccess of ekf feats
     PAR.ekf.min_vel_init_feats = .02; // m/s, Minimun x-y velocity for initialize new feats
     PAR.ekf.min_vel_update_feats = .02; // m/s Minimun x-y velocity for updating feats
     PAR.ekf.min_n_pred_feats_for_init = 20; // Minimun number of predicted feats in current frame, for initialize new feats using the last available range  
@@ -155,6 +155,22 @@ void BEBOPparameters(parameters &PAR)
     PAR.plot_3D.show_ekf_trajectory = false;
     PAR.plot_3D.show_camera_pose = true;
     PAR.plot_3D.show_key_frames = true;
+
+
+   // Control
+   PAR.control.kx = 1;   // gain for x axis movements
+   PAR.control.ky = 1;   // gain for y axis movements
+   PAR.control.kz = 1;    // gain for x axis movements
+   PAR.control.kyaw = .5;   // gain for yaw movements
+   PAR.control.MaxVel_xy = 1;  // m/s    Maximun velocity allowed for x-y movements
+   PAR.control.MaxVel_z = 1; // m/s Maximun velocity allowed for z (vertical) movement
+   PAR.control.MaxVel_yaw = 1; // rad/s Maximun velocity allowed for rotational (yaw) movement
+   PAR.control.Max_error_xyz_reach_p = .1; // m  Maximun euclidean error allowed for considered a "go to point" command succesuful
+   PAR.control.Max_error_yaw_reach_p = 5*(3.1416/180); // rads  Maximun rotational (yaw) error allowed for considered a "go to point" command succesuful  
+   
+ 
+
+
 } 
 
 

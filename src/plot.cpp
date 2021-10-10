@@ -191,16 +191,23 @@ void PLOT::init(EKF &ekf,GMAP &gmap,LOCKS &locks,bool &running)
       
       if(count > 0)
       {
-        locks.ekf_run_mtx.lock();          
-            EKFmap = ekf.store.EKFmap; 
-            EKFmap_color = ekf.store.EKFmap_color;
-            EKFtrajectory = ekf.store.EKFtrajectory;          
-            ANCHORSmap = ekf.store.ANCHORSmap;
-            ANCHORSmap_color =  ekf.store.ANCHORSmap_color;
-            pose = ekf.store.pose;
-            current_frame = ekf.store.current_frame;
-            FeatsDATA = *ekf.store.FeatsDATA; 
-          AnchorsDATA = *ekf.store.AnchorsDATA;
+        locks.ekf_run_mtx.lock();
+          try
+            {          
+              EKFmap = ekf.store.EKFmap; 
+              EKFmap_color = ekf.store.EKFmap_color;
+              EKFtrajectory = ekf.store.EKFtrajectory;          
+              ANCHORSmap = ekf.store.ANCHORSmap;
+              ANCHORSmap_color =  ekf.store.ANCHORSmap_color;
+              pose = ekf.store.pose;
+              current_frame = ekf.store.current_frame;              
+              FeatsDATA = *ekf.store.FeatsDATA; 
+              AnchorsDATA = *ekf.store.AnchorsDATA;
+            }
+          catch(std::bad_alloc & exception) 
+            {
+               std::cerr << "bad_alloc detected: " << exception.what(); 
+            }    
       locks.ekf_run_mtx.unlock();
 
         locks.ReadGlobalMAP_mtx.lock();

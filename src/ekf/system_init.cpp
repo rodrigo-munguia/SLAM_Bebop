@@ -22,7 +22,7 @@ using namespace arma;
 % x(11:13)= [v_x v_y v_z]  -> Velocity in navigation coordinate frame.
 */
 
-bool system_init(arma::vec& x, arma::mat& P, parameters &par, DATA &dat,double &yaw_at_home,CamPose &Init_cam_position )
+bool system_init(arma::vec& x, arma::mat& P, parameters &par, DATA &dat,double &yaw_at_home,CamPose &Init_cam_position)
 {
     static int n_att = 0;
     static double sum_yaw = 0;

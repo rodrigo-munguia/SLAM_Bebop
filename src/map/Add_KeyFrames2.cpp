@@ -27,7 +27,7 @@ bool GMAP::Add_KeyFrames2()
         {   
           if(ft == false)
           {
-              cout << NewKeyFDATA.size() << endl;
+              //cout << NewKeyFDATA.size() << endl;
               ft = true;  
           }
             

@@ -28,10 +28,21 @@ class GMAP
         {
             PAR = par;
             closing_loop_active = false;
-            loop_detected = false;
-           
+            loop_detected = false;           
             
-            
+        }
+
+        void reset()
+        {
+           closing_loop_active = false;
+           loop_detected = false; 
+           KeyFDATA.clear();  
+           AnchorsDATA.clear();
+           Vgraph.reset();
+           Full_update_VG = false;   
+           store.GLOBALmap.release();
+           store.GLOBALmap_color.release();
+           store.path.clear();
         }
 
         

@@ -3,18 +3,20 @@
 #include "loop/loop.h"
 #include "locks.h"
 #include "parameters.h"
+#include "control/control.h"
 
 
  void StartDataCapture(vpRobotBebop2 &drone);
  void StopDataCapture(vpRobotBebop2 &drone);
  void SingleFrameCapture(vpRobotBebop2 &drone);
- void StartSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks);
+ void StartSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks,GMAP &gmap,LOOP &cloop);
  void StopSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks);
  void printcommands();
+ void StartControlPlan(EKF &ekf,CONTROL &control);
 
 
 //--------------------------------------------------
- bool handleKeyboardInput(vpRobotBebop2 &drone, int key, EKF &ekf, LOCKS &locks,parameters &par)
+ bool handleKeyboardInput(vpRobotBebop2 &drone, int key, EKF &ekf, LOCKS &locks,parameters &par,GMAP &gmap,LOOP &cloop,CONTROL &control,bool &stop_control)
  {
    bool running = true;
    if (drone.isRunning()) {
@@ -38,6 +40,7 @@
  
      case ' ':
        // Landing
+       stop_control = true; 
        drone.land();
        break;
  
@@ -82,13 +85,14 @@
        break;
 
      case '1':
-       // Start data capture
-       StartDataCapture(drone);
+       // Start control plan
+       StartControlPlan(ekf,control);
+      
        break;
      
      case '2':
-      // Stop data capture
-       StopDataCapture(drone);
+      // Stop control plan!!
+       stop_control = true;        
        break;
 
      case '3':
@@ -99,17 +103,17 @@
      case '7':
        // Downward camera
        drone.setCameraOrientation(-90,0,false);
-       std::cout << "Downward camera " << std::endl;
+       std::cout << "-> Downward camera " << std::endl;
        break;
      
      case '6':
        // forward camera
        drone.setCameraOrientation(0,0,false);
-      std::cout << "Forward camera camera " << std::endl;
+      std::cout << "-> Forward camera camera " << std::endl;
        break;
 
      case 'b':
-       std::cout << "Battery level: " << drone.getBatteryLevel() << " percent"<< std::endl;
+       std::cout << "-> Battery level: " << drone.getBatteryLevel() << " percent"<< std::endl;
        break;
 
      case 'c':
@@ -125,7 +129,7 @@
         break;
 
      case '9': // Start SLAM
-       StartSLAM(ekf,drone,par,locks);
+       StartSLAM(ekf,drone,par,locks,gmap,cloop);
        break;                     
  
      default:
@@ -140,10 +144,28 @@
    return running;
  }
 
+//----------------------------------------------------------
+ void StartControlPlan(EKF &ekf,CONTROL &control)
+ {
+  
+  if(ekf.Initialized == true)
+  {
+    control.execute_control_plan = true;
+
+  }
+  else
+  {
+    cout << "-> SLAM is not running!" << endl;
+  }
+
+
+ }
+
+
 //------------------------------------------------------
 void StopSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks)
 {
-  std::cout << "Stop SLAM.." << std::endl;
+  std::cout << "-> Stop SLAM.." << std::endl;
 
   locks.ekf_run_mtx.lock();    
     ekf.run = false;
@@ -151,7 +173,7 @@ void StopSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks)
   locks.ekf_run_mtx.unlock();
 
 }
-void StartSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks)
+void StartSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks,GMAP &gmap,LOOP &cloop)
 {
   
 
@@ -175,13 +197,17 @@ void StartSLAM(EKF &ekf,vpRobotBebop2 &drone,parameters &par, LOCKS &locks)
   ekf.Init_cam_position.z = par.init.z_init;
 
 
-  std::cout << "Initializing EKF-SLAM.." << std::endl;
+  std::cout << "-> Initializing EKF-SLAM.." << std::endl;
   
   locks.ekf_run_mtx.lock();    
     ekf.run = false;
     ekf.Initialized = false; // Every time SLAM is started, the system must be reinitialized
   locks.ekf_run_mtx.unlock();
-     sleep(1); // give time to finish the last ekf loop  
+    
+    gmap.reset();
+    cloop.reset();
+    
+    sleep(1); // give time to finish the last ekf loop  
 
     //ekf.state_init(); // initialize system state
   
@@ -248,7 +274,7 @@ void StartDataCapture(vpRobotBebop2 &drone)
                     "|   't' to takeoff / spacebar to land / 'w' for emergency stop\n"
                     "|   ('r','f','d','g') and ('i','k','j','l') to move\n"
                     "|   'q' to quit.\n"
-                    "|   1-> start capture  2-> stop capture  3-> single frame capture\n"
+                    "|   1-> Start control plan  2-> Stop control plan 3-> single frame capture\n"
                     "|   5-> Get GPS location 6-> Forward camera  7-> Downward camera  'b'-> Battery level 'c'->  Commands menu\n "
                     "|   8-> Stop SLAM  9-> Start SLAM\n "
                  << std::endl;

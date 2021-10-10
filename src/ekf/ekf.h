@@ -94,7 +94,8 @@ class EKF
 
         bool Initialized;
         
-        double yaw_at_home; 
+        double yaw_at_home;
+        double z_yaw;  // yaw obtained from bebop, transformed to local frame 
 
         CamPose Init_cam_position; 
 

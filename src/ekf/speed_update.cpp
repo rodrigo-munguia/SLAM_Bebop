@@ -23,7 +23,7 @@ void speed_Update(arma::vec& x, arma::mat& P,SPD &speed,parameters &par)
     // account for Bebop to camera coordinate transformation
     z(0) = speed.speedY;  
     z(1) = -speed.speedX;
-    z(2) = -speed.speedZ;
+    z(2) = speed.speedZ;
 
     arma::vec::fixed<3> s_c = x.subvec(10,12); // (velocity) speed vector in vnavigation frame
     
