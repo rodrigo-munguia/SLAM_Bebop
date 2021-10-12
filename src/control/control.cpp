@@ -1,8 +1,13 @@
 #include "control.h"
 #include <unistd.h>
 #include "../Transforms/AngleWrap.h"
+#include "../Transforms/Euler_to_Ra2b.h"
+#include "../Transforms/Ra2b_TO_Quat_a2b.h"
+#include "../vision/vision.h"
 #include <math.h>
 #include <visp3/core/vpConfig.h>
+#include "../matplotlib/matplotlibcpp.h"
+namespace plt = matplotlibcpp;
 
 
 inline bool file_exist(const std::string& name) {
@@ -66,6 +71,7 @@ void CONTROL::control_plan(LOCKS &locks,bool &stop_control,ifstream &file_Contro
     
     
     string cmd_line;
+    int ne_cmd = 0;
         
         while ( getline(file_Control_plan,cmd_line) && stop_control == false )
         {
@@ -94,7 +100,8 @@ void CONTROL::control_plan(LOCKS &locks,bool &stop_control,ifstream &file_Contro
                  dp.z = -stod(cmd_args[3]);    
                  dp.yaw = stod(cmd_args[4])*(3.1416/180);           
                  cout << "-> go to point (r): " << dp.x << " " << -dp.y << " " << -dp.z << " " << dp.yaw  << endl;
-                 go_point(true,locks,stop_control, r_state_0, dp,drone );
+                 string break_info;
+                 go_point(true,locks,stop_control, r_state_0, dp,drone,false,break_info );
             }
 
             if(cmd == "pointa") // absolute point
@@ -106,7 +113,8 @@ void CONTROL::control_plan(LOCKS &locks,bool &stop_control,ifstream &file_Contro
                  dp.z = -stod(cmd_args[3]);    
                  dp.yaw = stod(cmd_args[4])*(3.1416/180);           
                  cout << "-> go to point (a): " << dp.x << " " << -dp.y << " " << -dp.z << " " << dp.yaw  << endl;
-                 go_point(false,locks,stop_control, r_state_0, dp,drone );
+                 string break_info;
+                 go_point(false,locks,stop_control, r_state_0, dp,drone,false,break_info  );
             }
 
             if(cmd == "takeoff") // absolute point
@@ -123,9 +131,10 @@ void CONTROL::control_plan(LOCKS &locks,bool &stop_control,ifstream &file_Contro
             {                
                 recognize_home(locks,stop_control,drone);                
             }
-             
-
-            
+            if(cmd == "home")
+            {
+                home(locks,stop_control,drone); 
+            }            
 
             if(stop_control == true)
             {   
@@ -133,34 +142,290 @@ void CONTROL::control_plan(LOCKS &locks,bool &stop_control,ifstream &file_Contro
                 cout << "Stopping control plan.." << endl;
             }    
 
-           //usleep(10000); 
+           //usleep(10000);
+
+           ne_cmd++; 
         }
 
+        cout << "control plan finished, " << ne_cmd << " commands executed" << endl;
+
+}
+// ----------------------------------------------------------------------------------
+void CONTROL::home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &drone)
+{   
+    robot_state r_state_0 = r_state;  // get current state  
+    loop_closed = false;
+    robot_state ph;  
+    ph.x = 0;
+    ph.y = 0;
+    ph.z = r_state_0.z;
+    ph.yaw = 0;  
+    // go back to home
+    string break_info;
+    cout << "-> going to home" << endl;
+    go_point(false,locks,stop_control, r_state_0, ph,drone,true,break_info );  // absolute points
+
+    if( break_info == "loop_closed")
+    {
+       go_point(false,locks,stop_control, r_state_0, ph,drone,false,break_info );  // absolute points
+       cout << "-> Home reached" << endl;
+    }
+    else
+    {  
+       double lambda_y = PAR.control.home_lamba;   // ----------
+       double y_a = PAR.control.home_y_a_def; 
+       double x_a = PAR.control.home_x_a_def;    
+       cout << "-> Exploring home area from: (x: " << x_a << " y: " << y_a << ")   to (x: " << -x_a  << " y: " << -y_a << ")"<< endl; 
+       string break_infoE;
+       explore_area(locks,stop_control,lambda_y, x_a , y_a, drone,true,break_infoE);
+
+       if( break_infoE == "loop_closed")
+        {
+            go_point(false,locks,stop_control, r_state_0, ph,drone,false,break_info );  // absolute points
+            cout << "-> Home reached" << endl;
+        }
+       else
+       {   
+           go_point(false,locks,stop_control, r_state_0, ph,drone,false,break_info );  // absolute points
+           cout << "-> A loop has not been detected!" << endl; 
+       }
+    }    
+
+
 
 
 }
-//
+// ----------------------------------------------------------------------------------
 void CONTROL::recognize_home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &drone)
 {
-    robot_state r_state_0 = r_state;  // get current state 
-
+    robot_state r_state_0 = r_state;  // get current state  
     double axis_x = Init_cam_position_axis_x ;
     double axis_y = 0;
-    double axis_z = 0;
-        
+    double axis_z = r_state.yaw;        
     double Ra2b[9];
-    //Euler_to_Ra2b(axis_x, axis_y, axis_z, Ra2b);
-    double q_int[4];
-    //Ra2b_TO_Quat_a2b(Ra2b,q_int); 
+    Euler_to_Ra2b(axis_x, axis_y, axis_z, Ra2b);    
+    cv::Point2d uvd;
+    uvd.x = PAR.img.image_cols;  //320
+    uvd.y = PAR.img.image_rows;  //240
+    arma::vec::fixed<3> hc;
+    arma::mat::fixed<3,2> dhc_duvd;
+    hc = Inverse_projection_model(uvd,1,false, PAR.img.cam_parameters,dhc_duvd); // compute inverse projection model    
+    arma::mat Rn2c(Ra2b,3,3); // convert from arrat to armadillo
+    arma::mat::fixed<3,3> Rc2n = Rn2c.t();
+    arma::vec::fixed<3> hn = Rc2n*hc;    
+    arma::vec::fixed<3> m = hn/arma::norm(hn); // normalized vector (in the nav frame) pointing in the direction of the feature
+    arma::vec::fixed<3> v = {0,0,1};
+    arma::vec::fixed<3> vn =  Rc2n*v;    
+    double depth = (abs(r_state.z)) /arma::dot(m,vn);    
+    arma::vec::fixed<3> p_r =  depth*m;    
+    double yv = p_r(1);
+    double lambda_y = 0;   // ----------
+    double ym = yv + yv*lambda_y;    
+  
+    double y_a = ym; 
+    double x_a = ym;    
+    
+    cout << "-> Exploring home area from: (x: " << x_a << " y: " << y_a << ")   to (x: " << -x_a  << " y: " << -y_a << ")"<< endl; 
+    
+    string break_info;
+    explore_area(locks,stop_control,lambda_y, x_a , y_a, drone,false,break_info);
 
+    robot_state ph;  
+    ph.x = r_state_0.x;
+    ph.y = r_state_0.y;
+    ph.z = r_state_0.z;
+    ph.yaw = r_state_0.yaw;  
+    // go back to home
+    string break_info2;
+    go_point(false,locks,stop_control, r_state_0, ph,drone,false,break_info2  );  // absolute points
 
+    cout << "-> Exploring home area done " << endl;
 
 
 }
 
+//-----------------------------------------------------------------
+bool CONTROL::explore_area(LOCKS &locks,bool &stop_control, double lambda_y, double x_a, double y_a, vpRobotBebop2 &drone, bool break_at_CL, std::string &break_info)
+{
+    // lambda_y [-1, 1] indicates the minimun overlap region along y axis
+
+    robot_state r_state_0 = r_state;  // get current state 
+ 
+    double axis_x = Init_cam_position_axis_x ;
+    double axis_y = 0;
+    double axis_z = r_state.yaw;
+        
+    double Ra2b[9];
+    Euler_to_Ra2b(axis_x, axis_y, axis_z, Ra2b);    
+    cv::Point2d uvd;
+    uvd.x = PAR.img.image_cols;  //320
+    uvd.y = PAR.img.image_rows;  //240
+    arma::vec::fixed<3> hc;
+    arma::mat::fixed<3,2> dhc_duvd;
+    hc = Inverse_projection_model(uvd,1,false, PAR.img.cam_parameters,dhc_duvd); // compute inverse projection model    
+    arma::mat Rn2c(Ra2b,3,3); // convert from arrat to armadillo
+    arma::mat::fixed<3,3> Rc2n = Rn2c.t();
+    arma::vec::fixed<3> hn = Rc2n*hc;    
+    arma::vec::fixed<3> m = hn/arma::norm(hn); // normalized vector (in the nav frame) pointing in the direction of the feature
+    arma::vec::fixed<3> v = {0,0,1};
+    arma::vec::fixed<3> vn =  Rc2n*v;
+    
+    double depth = (abs(r_state.z)) /arma::dot(m,vn);
+    //double depth = (1) /arma::dot(m,vn);
+    
+    arma::vec::fixed<3> p_r =  depth*m; 
+    
+    double xv = p_r(0);
+    double yv = p_r(1);
+    double zv = p_r(2);
+
+    
+    double ym = yv + yv*lambda_y;
+    int n_seg_y = int(y_a/ym);
+    if (n_seg_y == 0) n_seg_y = 1; 
+
+    double dy = y_a/(double)n_seg_y;
+
+    double py = y_a;
+    
+    vector<robot_state> pr;
+    vector<double> x_i,y_i;
+    
+    
+    // initial point
+    robot_state p;  
+     p.x = x_a + r_state_0.x;
+     p.y = py + r_state_0.y;
+      p.z = r_state_0.z;
+      p.yaw = r_state_0.yaw;      
+      pr.push_back(p); 
+    //-----------------------  
+      x_i.push_back(p.x);
+      y_i.push_back(-p.y);
+      
+      bool right = 0;  
+      int c_lr = 0;
+    
+    for(int i = 1; i < (n_seg_y*4 +2)  ; i++)
+    {      
+      robot_state p;      
+      if(right == 1)
+      {
+          p.x = x_a + r_state_0.x;
+          p.y = py + r_state_0.y;
+          c_lr ++;
+            if(c_lr == 2) 
+            {
+                right = 0;
+                c_lr = 0;
+            }
+            else
+            {
+                py = py - dy;
+            }     
+      }
+      else
+      {
+         p.x = -x_a + r_state_0.x; 
+         p.y = py + r_state_0.y;
+         
+         c_lr ++;
+         if(c_lr == 2) 
+         {
+             right = 1;
+             c_lr = 0;
+         }
+         else
+         {
+            py = py - dy;
+         }    
+
+      }      
+      
+      p.z = r_state_0.z;
+      p.yaw = r_state_0.yaw;
+
+      pr.push_back(p);            
+      
+      x_i.push_back(p.x);
+      y_i.push_back(-p.y);
+
+    }
+
+   // plt::figure(1); 
+   // plt::plot(x_i,y_i,"y."); 
+   // plt::axis("equal");    
+   // plt::show();      
+    
+    for(int i=0; i < pr.size(); i++)
+    {   
+        robot_state r_state_0 = r_state;  // get current state 
+        string break_infoP;
+        if (break_at_CL == false)
+        { 
+         go_point(false,locks,stop_control, r_state_0, pr[i],drone ,false,break_info );  // absolute points
+         cout << "-> go to point (a): " << pr[i].x << " " << -pr[i].y << " " << -pr[i].z << " " << pr[i].yaw  << endl;
+        }
+        else
+        {
+          go_point(false,locks,stop_control, r_state_0, pr[i],drone ,true,break_infoP );  // absolute points 
+
+          if (break_infoP == "loop_closed")
+          {
+             cout << "-> Loop detected while exploring area, stoping exploration" << endl;
+             break_info = "loop_closed";
+             return false;
+          }
+
+        } 
+         
+    }
+
+    return true;    
+
+}
+
+/*
+// p1
+    robot_state p1;
+    p1.x = xv + xv*lambda_x;
+    p1.y = 0;
+    p1.z = 0;
+    p1.yaw = 0;
+    pr.push_back(p1);
+    //
+    robot_state p2;
+    p2.x = 0;
+    p2.y = -(yv + yv*lambda_y);
+    p2.z = 0;
+    p2.yaw = 0;
+    pr.push_back(p2);
+    //
+    robot_state p3;
+    p3.x = -2*(xv + xv*lambda_x);
+    p3.y = 0;
+    p3.z = 0;
+    p3.yaw = 0;
+    pr.push_back(p3);
+    //
+    robot_state p4;
+    p4.x = 0;
+    p4.y = 2*(yv + yv*lambda_y);
+    p4.z = 0;
+    p4.yaw = 0;
+    pr.push_back(p4);
+    //
+    robot_state p5;
+    p5.x = 2*(xv + xv*lambda_x);
+    p5.y = 0;
+    p5.z = 0;
+    p5.yaw = 0;
+    pr.push_back(p5);
+
+*/
 
 //-------------------------------------------------------------------------
-void CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_state r_state_0, robot_state r_state_to_go,vpRobotBebop2 &drone )
+bool CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_state r_state_0, robot_state r_state_to_go,vpRobotBebop2 &drone , bool break_at_CL, std::string &break_info)
 {
     // If relative == true, then:
     // the movement is executed relative to its current position.   
@@ -222,7 +487,8 @@ void CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_stat
              drone.stopMoving(); 
              // if error is less than some threshold break
              cout << "-> point reached" << endl;
-             break;
+             return true;
+             //break;
          }
 
         // set gains
@@ -269,16 +535,32 @@ void CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_stat
         ve[2] = -vz;
         ve[3] = -vyaw;
         
-        //drone.setVelocity(ve, 1.0);
+        drone.setVelocity(ve, 1.0);
        // cout << "e: " << e(0) << " " << e(1) << " " << e(2) << " " << e(3)  << endl;
         
-        cout << "ve_n: " << vx << " " << vy << " " << vz << " " << vyaw  << endl;
+        //cout << "ve_n: " << vx << " " << vy << " " << vz << " " << vyaw  << endl;
 
-        cout << "ve_r: " << ve[0] << " " << ve[1] << " " << ve[2] << " " << ve[3]  << endl;
+        //cout << "ve_r: " << ve[0] << " " << ve[1] << " " << ve[2] << " " << ve[3]  << endl;
+
+       if(break_at_CL == true) 
+       {   
+           // only if flag break_at_CL is set, stop and return with false if a close loop is detected
+           if(loop_closed == true) // 
+           {
+               drone.stopMoving();
+               break_info = "loop_closed";
+               return false; 
+           }
+
+
+       }
+
 
         usleep(40000);  // wait 40 milliseconds 
     }    
-    drone.stopMoving(); 
+    drone.stopMoving();
+    break_info = "stop_control";
+    return false; 
   
 
 

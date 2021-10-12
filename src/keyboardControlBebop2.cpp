@@ -421,6 +421,12 @@ void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,CONTROL &control,parameters &par,L
 
             //cout << ekf.z_yaw << endl;
           }
+          if (cloop.new_xy_position_available == true )
+          {
+            arma::vec::fixed<2> xy_pos = cloop.get_new_xy_pos();
+            ekf.closing_loop_position_update(xy_pos);          
+            control.loop_closed = true;
+          }
 
         } // else (init ==true)
 

@@ -181,6 +181,9 @@ struct CONTROL_par
   double ky;
   double kz;
   double kyaw;
+  double home_lamba;
+  double home_x_a_def;
+  double home_y_a_def; 
 
 
 };

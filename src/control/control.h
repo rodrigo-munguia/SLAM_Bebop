@@ -43,6 +43,8 @@ class CONTROL
 
         double Init_cam_position_axis_x;
 
+        bool loop_closed = false;
+
     private:
         parameters PAR;
 
@@ -50,9 +52,14 @@ class CONTROL
 
         void control_plan(LOCKS &locks,bool &stop_control,ifstream &file_Control_plan,vpRobotBebop2 &drone); 
         
-        void go_point(bool relative,LOCKS &locks,bool &stop_control, robot_state r_state_at_home, robot_state r_state_to_go,vpRobotBebop2 &drone );
+        bool go_point(bool relative,LOCKS &locks,bool &stop_control, robot_state r_state_at_home, robot_state r_state_to_go,vpRobotBebop2 &drone, bool break_at_CL, std::string &break_info);
 
         void recognize_home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &drone);
+
+        bool explore_area(LOCKS &locks,bool &stop_control, double lambda_y, double x_a, double y_a, vpRobotBebop2 &drone, bool break_at_CL, std::string &break_info);
+
+        void home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &drone);
+
 
     
 };

@@ -37,6 +37,11 @@ OPENCV_SRC_DIR := /usr/local/include/opencv4/
 OPENCV = `pkg-config opencv --cflags --libs`
 OPENCVLIBRARIES = $(OPENCV)
 #-------------------------------------------------------------------------------------------
+# Python  (for 2D ploting)
+PYTHON_SRC_DIR := /usr/include/python3.6
+PYTHON_BIN_DIR := /usr/lib/python3.6/config-3.6m-x86_64-linux-gnu
+PYTHON_LIB := -lpython3.6  
+
 # ARDroneSDK3
 
 VISP_BUILD_DIR = /home/rodrigo/RESEARCH/visp-ws/visp-build
@@ -80,12 +85,12 @@ CXX		  := g++
 CXX_FLAGS := -pthread -Wfatal-errors -g -Wall -Wextra -std=c++17 -fpermissive -static $(DEBUG) $(DEBUG_ARMA) $(OPT) $(EXTRA_OPT)
  #-fpermissive
 
-INCLUDE	:= -I$(LIB_INCLUDE) -I$(OPENCV_SRC_DIR) -I$(EIGEN_SRC_DIR) $(CERES_INCLUDES)
+INCLUDE	:= -I$(LIB_INCLUDE) -I$(OPENCV_SRC_DIR) -I$(EIGEN_SRC_DIR) $(CERES_INCLUDES) -I$(PYTHON_SRC_DIR)
 INCLUDE2 := 
-LIB		:= -L$(LIB_DIR) -L$(LIB_DEPENDENCIES_DIR) -L$(VISP_lib) $(CERES_LIBRARY_PATH)
+LIB		:= -L$(LIB_DIR) -L$(LIB_DEPENDENCIES_DIR) -L$(VISP_lib) $(CERES_LIBRARY_PATH) -L$(PYTHON_BIN_DIR)
 
 
-LIBRARIES	:=  $(LIB_DEPENDENCIES) $(ARMADILLO_LIB) $(LIB_ARDrone_DEP) $(CERES_LIBRARY) $(CERES_LIBRARY_DEPENDENCIES)
+LIBRARIES	:=  $(LIB_DEPENDENCIES) $(ARMADILLO_LIB) $(LIB_ARDrone_DEP) $(CERES_LIBRARY) $(CERES_LIBRARY_DEPENDENCIES) $(PYTHON_LIB)
 
 EXECUTABLE	:= SLAMbebop
 

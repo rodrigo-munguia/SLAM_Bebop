@@ -23,9 +23,9 @@ void BEBOPparameters(parameters &PAR)
    
     
     //PAR.init.GPS_init_yaw = 98*(3.1416/180);  // For aligning GPS points with local coordinates 
-    PAR.init.roll_init = 0;
-    PAR.init.pitch_init = 0;
-    PAR.init.yaw_init = 0*(3.1416/180);  //     
+    PAR.init.axis_x_init = 0;
+    PAR.init.axis_y_init = 0;
+    PAR.init.axis_z_init = 0*(3.1416/180);  //     
     PAR.init.x_init = 0;
     PAR.init.y_init = 0;
     PAR.init.z_init = 0;
@@ -69,7 +69,7 @@ void BEBOPparameters(parameters &PAR)
     PAR.ekf.sigma_sp = .001;  // speed measurment noise
     PAR.ekf.sigma_att_update = .01;
     
-    PAR.ekf.min_vel_start_init = .2; // m/s , Minimun x-y velocity for starting the initialization proccess of ekf feats
+    PAR.ekf.min_vel_start_init = .1; // m/s , Minimun x-y velocity for starting the initialization proccess of ekf feats
     PAR.ekf.min_vel_init_feats = .02; // m/s, Minimun x-y velocity for initialize new feats
     PAR.ekf.min_vel_update_feats = .02; // m/s Minimun x-y velocity for updating feats
     PAR.ekf.min_n_pred_feats_for_init = 20; // Minimun number of predicted feats in current frame, for initialize new feats using the last available range  
@@ -167,7 +167,9 @@ void BEBOPparameters(parameters &PAR)
    PAR.control.MaxVel_yaw = 1; // rad/s Maximun velocity allowed for rotational (yaw) movement
    PAR.control.Max_error_xyz_reach_p = .1; // m  Maximun euclidean error allowed for considered a "go to point" command succesuful
    PAR.control.Max_error_yaw_reach_p = 5*(3.1416/180); // rads  Maximun rotational (yaw) error allowed for considered a "go to point" command succesuful  
-   
+   PAR.control.home_x_a_def = .5; 
+   PAR.control.home_y_a_def = .5;
+   PAR.control.home_lamba = 0;
  
 
 
