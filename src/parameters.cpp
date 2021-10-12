@@ -67,7 +67,7 @@ void BEBOPparameters(parameters &PAR)
     PAR.ekf.sigma_id_range_dem = 10; //25  // Feats with range:  sig_d_ini = depth/par.ekf.sigma_id_range_dem
     PAR.ekf.sigma_id_WOrange_dem = 5; // 20 // Feats without range:  sig_d_ini = depth/par.ekf.sigma_id_WOrange_dem
     PAR.ekf.sigma_sp = .001;  // speed measurment noise
-    PAR.ekf.sigma_att_update = .01;
+    PAR.ekf.sigma_att_update = .000001;
     
     PAR.ekf.min_vel_start_init = .1; // m/s , Minimun x-y velocity for starting the initialization proccess of ekf feats
     PAR.ekf.min_vel_init_feats = .02; // m/s, Minimun x-y velocity for initialize new feats
@@ -162,14 +162,14 @@ void BEBOPparameters(parameters &PAR)
    PAR.control.ky = 1;   // gain for y axis movements
    PAR.control.kz = 1;    // gain for x axis movements
    PAR.control.kyaw = .5;   // gain for yaw movements
-   PAR.control.MaxVel_xy = 1;  // m/s    Maximun velocity allowed for x-y movements
-   PAR.control.MaxVel_z = 1; // m/s Maximun velocity allowed for z (vertical) movement
+   PAR.control.MaxVel_xy = .5;  // m/s    Maximun velocity allowed for x-y movements
+   PAR.control.MaxVel_z = .5; // m/s Maximun velocity allowed for z (vertical) movement
    PAR.control.MaxVel_yaw = 1; // rad/s Maximun velocity allowed for rotational (yaw) movement
    PAR.control.Max_error_xyz_reach_p = .1; // m  Maximun euclidean error allowed for considered a "go to point" command succesuful
    PAR.control.Max_error_yaw_reach_p = 5*(3.1416/180); // rads  Maximun rotational (yaw) error allowed for considered a "go to point" command succesuful  
    PAR.control.home_x_a_def = .5; 
    PAR.control.home_y_a_def = .5;
-   PAR.control.home_lamba = 0;
+   PAR.control.home_lamba = -.5;
  
 
 

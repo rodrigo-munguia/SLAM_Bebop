@@ -321,6 +321,8 @@ void Attitude_Update_2(arma::vec& x, arma::mat& P,ATT &att,parameters &par, doub
 
 void Attitude_Update_3(arma::vec& x, arma::mat& P,ATT &att,parameters &par, double &yaw_at_home,  CamPose &Init_cam_position)
 {
+    
+    static double last_qz = 0;
 
      arma::vec::fixed<4> z;  // quat measurement
     // account for Bebop to camera coordinate transformation
@@ -328,9 +330,10 @@ void Attitude_Update_3(arma::vec& x, arma::mat& P,ATT &att,parameters &par, doub
     double roll_r = att.roll; 
     double pitch_r = att.pitch;
     double yaw_z = att.yaw + yaw_at_home;  //  use local yaw measurements
-    AngleWrap(yaw_z);
+    //AngleWrap(yaw_z);
 
-     
+    
+
     // account for robot to camera coordintate frame 
     double axis_x = pitch_r + Init_cam_position.axis_x;
     double axis_y = -roll_r ;
@@ -342,10 +345,20 @@ void Attitude_Update_3(arma::vec& x, arma::mat& P,ATT &att,parameters &par, doub
     Euler_to_Ra2b(axis_x, axis_y, axis_z, Ra2b);
     double q_z[4];
     Ra2b_TO_Quat_a2b(Ra2b,q_z);
-    
-   // cout << "q_z: " << q_z[0] << " " << q_z[1] << " " << q_z[2] << " " << q_z[3] << endl;
 
-   // cout << "q_h: " << x[0] << " " << x[1] << " " << x[2] << " " << x[3] << endl;
+    if(((q_z[3] > 0)&&(last_qz <0))||((q_z[3] < 0)&&(last_qz >0)))
+    {
+    // if change of sign in z axis, force update
+      x[0] = q_z[0];
+      x[1] = q_z[1];  
+      x[2] = q_z[2];    
+      x[3] = q_z[3];  
+    }
+    last_qz = q_z[3];
+    
+    //cout << "q_z: " << q_z[0] << " " << q_z[1] << " " << q_z[2] << " " << q_z[3] << endl;
+
+    //cout << "q_h: " << x[0] << " " << x[1] << " " << x[2] << " " << x[3] << endl;
     
     // vector measurement
     z[0] = q_z[0];
@@ -368,10 +381,10 @@ void Attitude_Update_3(arma::vec& x, arma::mat& P,ATT &att,parameters &par, doub
 
     double vs = par.ekf.sigma_att_update*par.ekf.sigma_att_update;  // variance
     arma::mat::fixed<4,4> R;
-            R(0,0) = vs*.0000001;
-            R(1,1) = vs*.0000001;
-            R(2,2) = vs*.0000001;
-            R(3,3) = vs*.0000001; 
+            R(0,0) = vs; //*.0000001;
+            R(1,1) = vs; //*.0000001;
+            R(2,2) = vs; //*.0000001;
+            R(3,3) = vs; //*.0000001; 
             
             arma::mat H_P = H*P;
             arma::mat S = H_P*H.t() + R; // Innovation matrix

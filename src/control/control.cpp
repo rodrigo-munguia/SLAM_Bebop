@@ -219,7 +219,7 @@ void CONTROL::recognize_home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &dron
     double depth = (abs(r_state.z)) /arma::dot(m,vn);    
     arma::vec::fixed<3> p_r =  depth*m;    
     double yv = p_r(1);
-    double lambda_y = 0;   // ----------
+    double lambda_y = -.25;   // ----------
     double ym = yv + yv*lambda_y;    
   
     double y_a = ym; 
@@ -505,15 +505,7 @@ bool CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_stat
         double vz = -kx*e(2);
         double vyaw = -kx*e(3);
 
-        // check for max velocities allowed
-        if(vx > PAR.control.MaxVel_xy ) vx = PAR.control.MaxVel_xy;
-        if(vx < -PAR.control.MaxVel_xy ) vx = -PAR.control.MaxVel_xy;
-        if(vy > PAR.control.MaxVel_xy ) vy = PAR.control.MaxVel_xy;
-        if(vy < -PAR.control.MaxVel_xy ) vy = -PAR.control.MaxVel_xy;
-        if(vz > PAR.control.MaxVel_xy ) vx = PAR.control.MaxVel_z;
-        if(vz < -PAR.control.MaxVel_xy ) vx = -PAR.control.MaxVel_z;
-        if(vyaw > PAR.control.MaxVel_xy ) vyaw = PAR.control.MaxVel_yaw;
-        if(vyaw < -PAR.control.MaxVel_xy ) vyaw = -PAR.control.MaxVel_yaw;
+        
 
        
         // transform velocities to bebop coodinate frame
@@ -534,6 +526,16 @@ bool CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_stat
         
         ve[2] = -vz;
         ve[3] = -vyaw;
+
+        // check for max velocities allowed
+        if(ve[0] > PAR.control.MaxVel_xy ) ve[0] = PAR.control.MaxVel_xy;
+        if(ve[0] < -PAR.control.MaxVel_xy ) ve[0] = -PAR.control.MaxVel_xy;
+        if(ve[1] > PAR.control.MaxVel_xy ) ve[1] = PAR.control.MaxVel_xy;
+        if(ve[1] < -PAR.control.MaxVel_xy ) ve[1] = -PAR.control.MaxVel_xy;
+        if(ve[2] > PAR.control.MaxVel_z ) ve[2] = PAR.control.MaxVel_z;
+        if(ve[2] < -PAR.control.MaxVel_z ) ve[2] = -PAR.control.MaxVel_z;
+        if(ve[3] > PAR.control.MaxVel_yaw ) ve[3] = PAR.control.MaxVel_yaw;
+        if(ve[3] < -PAR.control.MaxVel_yaw ) ve[3] = -PAR.control.MaxVel_yaw;
         
         drone.setVelocity(ve, 1.0);
        // cout << "e: " << e(0) << " " << e(1) << " " << e(2) << " " << e(3)  << endl;
