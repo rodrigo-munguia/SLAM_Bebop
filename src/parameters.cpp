@@ -64,8 +64,8 @@ void BEBOPparameters(parameters &PAR)
     PAR.ekf.AntGPSoffset[0] = 0; // % GPS antena to origin of robot coordinate frame, Must be expresed in NED coordiantes
     PAR.ekf.AntGPSoffset[1] = 0;
     PAR.ekf.AntGPSoffset[2] = 0;
-    PAR.ekf.sigma_id_range_dem = 10; //25  // Feats with range:  sig_d_ini = depth/par.ekf.sigma_id_range_dem
-    PAR.ekf.sigma_id_WOrange_dem = 5; // 20 // Feats without range:  sig_d_ini = depth/par.ekf.sigma_id_WOrange_dem
+    PAR.ekf.sigma_id_range_dem = 10; //10  // Feats with range:  sig_d_ini = depth/par.ekf.sigma_id_range_dem
+    PAR.ekf.sigma_id_WOrange_dem = 5; // 5 // Feats without range:  sig_d_ini = depth/par.ekf.sigma_id_WOrange_dem
     PAR.ekf.sigma_sp = .001;  // speed measurment noise
     PAR.ekf.sigma_att_update = .000001;
     
@@ -165,7 +165,11 @@ void BEBOPparameters(parameters &PAR)
    PAR.control.MaxVel_xy = .5;  // m/s    Maximun velocity allowed for x-y movements
    PAR.control.MaxVel_z = .5; // m/s Maximun velocity allowed for z (vertical) movement
    PAR.control.MaxVel_yaw = 1; // rad/s Maximun velocity allowed for rotational (yaw) movement
-   PAR.control.Max_error_xyz_reach_p = .1; // m  Maximun euclidean error allowed for considered a "go to point" command succesuful
+   PAR.control.MaxVel_xy2 = 100;  // Percentage of maximun velocity allowed for x-y movements
+   PAR.control.MaxVel_z2 = 100; // percentage of maximun velocity allowed for z (vertical) movement
+   PAR.control.MaxVel_yaw2 = 50; // parcentage of Maximun velocity allowed for rotational (yaw) movement
+   PAR.control.Max_error_xy_reach_p = .1; // m  Maximun euclidean error allowed for considered a "go to point" command succesuful
+   PAR.control.Max_error_z_reach_p = .25;
    PAR.control.Max_error_yaw_reach_p = 5*(3.1416/180); // rads  Maximun rotational (yaw) error allowed for considered a "go to point" command succesuful  
    PAR.control.home_x_a_def = .5; 
    PAR.control.home_y_a_def = .5;

@@ -150,19 +150,22 @@ void control_t(CONTROL &control,vpRobotBebop2 &drone,EKF &ekf,LOCKS &locks,bool 
  
        std::cout << "\nConfiguring drone settings ...\n" << std::endl;
  
-       drone.setMaxTilt(10); // Setting the max roll and pitch values, the drone speed will depend on it
+       
+        drone.setMaxTilt(10); // Setting the max roll and pitch values, the drone speed will depend on it
+       
  
        drone.doFlatTrim(); // Flat trim calibration
 
        // Downward camera
        drone.setCameraOrientation(-90,0,false);
+       // drone.setCameraOrientation(-45,0,false);
  
       #ifdef VISP_HAVE_FFMPEG
           drone.setVideoResolution(stream_res); // Setting desired stream video resolution
           drone.setStreamingMode(0); // Set streaming mode 0 : lowest latency
           std::cout << "\nWaiting for streaming to start ...\n" << std::endl;
           drone.startStreaming();
-          drone.setMaxTilt(80);
+         
     
           // Prepare image for display
         //  vpImage<vpRGBa> I(1, 1, 0);

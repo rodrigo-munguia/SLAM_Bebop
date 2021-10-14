@@ -101,7 +101,7 @@ void CONTROL::control_plan(LOCKS &locks,bool &stop_control,ifstream &file_Contro
                  dp.yaw = stod(cmd_args[4])*(3.1416/180);           
                  cout << "-> go to point (r): " << dp.x << " " << -dp.y << " " << -dp.z << " " << dp.yaw  << endl;
                  string break_info;
-                 go_point(true,locks,stop_control, r_state_0, dp,drone,false,break_info );
+                 go_point2(true,locks,stop_control, r_state_0, dp,drone,false,break_info );
             }
 
             if(cmd == "pointa") // absolute point
@@ -114,7 +114,7 @@ void CONTROL::control_plan(LOCKS &locks,bool &stop_control,ifstream &file_Contro
                  dp.yaw = stod(cmd_args[4])*(3.1416/180);           
                  cout << "-> go to point (a): " << dp.x << " " << -dp.y << " " << -dp.z << " " << dp.yaw  << endl;
                  string break_info;
-                 go_point(false,locks,stop_control, r_state_0, dp,drone,false,break_info  );
+                 go_point2(false,locks,stop_control, r_state_0, dp,drone,false,break_info  );
             }
 
             if(cmd == "takeoff") // absolute point
@@ -163,11 +163,11 @@ void CONTROL::home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &drone)
     // go back to home
     string break_info;
     cout << "-> going to home" << endl;
-    go_point(false,locks,stop_control, r_state_0, ph,drone,true,break_info );  // absolute points
+    go_point2(false,locks,stop_control, r_state_0, ph,drone,true,break_info );  // absolute points
 
     if( break_info == "loop_closed")
     {
-       go_point(false,locks,stop_control, r_state_0, ph,drone,false,break_info );  // absolute points
+       go_point2(false,locks,stop_control, r_state_0, ph,drone,false,break_info );  // absolute points
        cout << "-> Home reached" << endl;
     }
     else
@@ -181,12 +181,12 @@ void CONTROL::home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &drone)
 
        if( break_infoE == "loop_closed")
         {
-            go_point(false,locks,stop_control, r_state_0, ph,drone,false,break_info );  // absolute points
+            go_point2(false,locks,stop_control, r_state_0, ph,drone,false,break_info );  // absolute points
             cout << "-> Home reached" << endl;
         }
        else
        {   
-           go_point(false,locks,stop_control, r_state_0, ph,drone,false,break_info );  // absolute points
+           go_point2(false,locks,stop_control, r_state_0, ph,drone,false,break_info );  // absolute points
            cout << "-> A loop has not been detected!" << endl; 
        }
     }    
@@ -237,7 +237,7 @@ void CONTROL::recognize_home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &dron
     ph.yaw = r_state_0.yaw;  
     // go back to home
     string break_info2;
-    go_point(false,locks,stop_control, r_state_0, ph,drone,false,break_info2  );  // absolute points
+    go_point2(false,locks,stop_control, r_state_0, ph,drone,false,break_info2  );  // absolute points
 
     cout << "-> Exploring home area done " << endl;
 
@@ -363,12 +363,12 @@ bool CONTROL::explore_area(LOCKS &locks,bool &stop_control, double lambda_y, dou
         string break_infoP;
         if (break_at_CL == false)
         { 
-         go_point(false,locks,stop_control, r_state_0, pr[i],drone ,false,break_info );  // absolute points
+         go_point2(false,locks,stop_control, r_state_0, pr[i],drone ,false,break_info );  // absolute points
          cout << "-> go to point (a): " << pr[i].x << " " << -pr[i].y << " " << -pr[i].z << " " << pr[i].yaw  << endl;
         }
         else
         {
-          go_point(false,locks,stop_control, r_state_0, pr[i],drone ,true,break_infoP );  // absolute points 
+          go_point2(false,locks,stop_control, r_state_0, pr[i],drone ,true,break_infoP );  // absolute points 
 
           if (break_infoP == "loop_closed")
           {
@@ -423,14 +423,202 @@ bool CONTROL::explore_area(LOCKS &locks,bool &stop_control, double lambda_y, dou
     pr.push_back(p5);
 
 */
+//------------------------------------------------------------------------
+double sat(double in,double limit)
+{   
+    double out;
+    out = in;
+    if (in > limit) out = limit;
+    if (in < -limit) out = -limit;    
+
+    return out;
+}
+
 
 //-------------------------------------------------------------------------
+arma::vec::fixed<4> CONTROL::PI_control(arma::vec::fixed<4> xd, arma::vec::fixed<4> x, bool flag, gain &Kp, gain &Ki,double Ts )
+{
+    static  arma::vec::fixed<4> integrator_e;
+    static  arma::vec::fixed<4> error_d1;
+
+    if(flag == true)
+    {
+        integrator_e(0) = 0;
+        integrator_e(1) = 0;
+        integrator_e(2) = 0;
+        integrator_e(3) = 0;
+        error_d1(0) = 0;
+        error_d1(1) = 0;
+        error_d1(2) = 0;
+        error_d1(3) = 0;
+    }
+    arma::vec::fixed<4> error = xd - x; // error
+    AngleWrap(error(3));
+
+    integrator_e = integrator_e + (Ts/2)*(error + error_d1);
+    error_d1 = error;
+
+    arma::vec::fixed<4> u_unsat;
+    u_unsat(0) = Kp.x*error(0) + Ki.x*integrator_e(0);
+    u_unsat(1) = Kp.y*error(1) + Ki.y*integrator_e(1);
+    u_unsat(2) = Kp.z*error(2) + Ki.z*integrator_e(2);
+    u_unsat(3) = Kp.yaw*error(3) + Ki.yaw*integrator_e(3);
+
+    arma::vec::fixed<4> u;
+    u(0) = sat(u_unsat(0),PAR.control.MaxVel_xy2);
+    u(1) = sat(u_unsat(1),PAR.control.MaxVel_xy2);
+    u(2) = sat(u_unsat(2),PAR.control.MaxVel_z2);
+    u(3) = sat(u_unsat(3),PAR.control.MaxVel_yaw2);
+
+    // integrator anti-windup
+
+    integrator_e(0) = integrator_e(0) + (Ts/Ki.x)*(u(0) - u_unsat(0));
+    integrator_e(1) = integrator_e(1) + (Ts/Ki.y)*(u(1) - u_unsat(1));
+    integrator_e(2) = integrator_e(2) + (Ts/Ki.z)*(u(2) - u_unsat(2));
+    integrator_e(3) = integrator_e(3) + (Ts/Ki.yaw)*(u(3) - u_unsat(3));
+
+   return u;
+
+}
+
+bool CONTROL::go_point2(bool relative,LOCKS &locks,bool &stop_control, robot_state r_state_0, robot_state r_state_to_go,vpRobotBebop2 &drone , bool break_at_CL, std::string &break_info)
+{
+
+    // If relative == true, then:
+    // the movement is executed relative to its current position.   
+    bool arrive = false;
+    bool init_pi = false;
+    
+    while(stop_control == false)
+    {   
+        arma::vec::fixed<4> x;  // current robot state
+        x(0) =  r_state.x;
+        x(1) =  r_state.y;
+        x(2) =  r_state.z;
+        x(3) =  r_state.yaw;
+        AngleWrap(x(3)); 
+        
+        arma::vec::fixed<4> xd;  // desired robot state
+        if(relative == true)
+        {   
+            double a = r_state_0.yaw;
+            arma::mat::fixed<2,2> Rb2n =  {{cos(a), -sin(a)},
+                                           { sin(a), cos(a)}};
+            arma::vec::fixed<2> xy_to_go_C;
+            xy_to_go_C(0) =  r_state_to_go.x;
+            xy_to_go_C(1) =  r_state_to_go.y;                              
+           
+            arma::vec::fixed<2> xy_to_go_N;
+            
+            xy_to_go_N = Rb2n*xy_to_go_C;
+
+            xd(0) =  xy_to_go_N(0) + r_state_0.x;
+            xd(1) =  xy_to_go_N(1) + r_state_0.y;
+            xd(2) =  r_state_to_go.z + r_state_0.z;
+            xd(3) =  r_state_to_go.yaw + r_state_0.yaw;
+            AngleWrap(xd(3));
+        }
+        else
+        {           
+            xd(0) =  r_state_to_go.x;
+            xd(1) =  r_state_to_go.y;
+            xd(2) =  r_state_to_go.z;
+            xd(3) =  r_state_to_go.yaw;
+            AngleWrap(xd(3));
+        }     
+
+        //cout << "x: " << x(0) << " " << x(1) << " " << x(2) << " " << x(3)  << endl;
+        //cout << "xd: " << xd[0] << " " << xd[1] << " " << xd[2] << " " << xd[3]  << endl;
+
+        arma::vec::fixed<4> e = xd - x; // errror
+        AngleWrap(e(3)); 
+
+        double norm_xy_e = sqrt(e(0)*e(0) + e(1)*e(1));
+        double norm_z_e = abs(e(2));
+        double norm_yaw_e = abs(e(3));         
+
+         if(norm_xy_e < PAR.control.Max_error_xy_reach_p && norm_yaw_e < PAR.control.Max_error_yaw_reach_p && norm_z_e < PAR.control.Max_error_z_reach_p )
+         {   
+             drone.stopMoving(); 
+             // if error is less than some threshold break
+             cout << "-> point reached" << endl;
+             return true;
+             //break;
+         }
+
+        // set gains        
+        gain Kp;
+        Kp.x = 35;
+        Kp.y = 35;
+        Kp.z = 35;
+        Kp.yaw = 100;
+
+        gain Ki;
+        Ki.x = .3;
+        Ki.y = .3;
+        Ki.z = 5;
+        Ki.yaw = 0;        
+        
+        arma::vec::fixed<4> v_n;
+        if(init_pi == false)
+        {
+            v_n = PI_control(xd, x, true, Kp, Ki ,.025);
+            init_pi = true;
+        }
+        else
+        {
+           v_n = PI_control(xd, x, false, Kp, Ki ,.025); 
+        }
+              
+        // transform velocities to bebop coodinate frame
+        double a = x(3) + (3.1416/2) ;  // current yaw   
+        arma::mat::fixed<2,2> Rb2n =  {{cos(a), -sin(a)},
+                                           { sin(a), cos(a)}};
+        arma::vec::fixed<2> v_xy_N;
+        v_xy_N(0) =  v_n(0);
+        v_xy_N(1) =  v_n(1);                              
+           
+       arma::vec::fixed<2> v_xy_R = Rb2n.t()*v_xy_N;
+
+        arma::vec::fixed<4> v_b;
+        v_b(0) = -v_xy_R(0);
+        v_b(1) = -v_xy_R(1);        
+        v_b(2) = -v_n(2);
+        v_b(3) = v_n(3);        
+
+        drone.setPitch(v_b(0)); // + Forward
+        drone.setRoll(v_b(1));  //+ Right
+        drone.setVerticalSpeed(v_b(2));  // + Up
+        drone.setYawSpeed(v_b(3)); //  + Roll right
+
+       // cout << "e: " << e(0) << " " << e(1) << " " << e(2) << " " << e(3)  << endl;        
+      //  cout << "ve_n: " << v_n(0) << " " << v_n(1) << " " << v_n(2) << " " << v_n(3)  << endl;
+      //  cout << "ve_r: " << v_b(0)  << " " << v_b(1)  << " " << v_b(2)  << " " << v_b(3)   << endl;
+       
+       if(break_at_CL == true) 
+       {   
+           // only if flag break_at_CL is set, stop and return with false if a close loop is detected
+           if(loop_closed == true) // 
+           {
+               drone.stopMoving();
+               break_info = "loop_closed";
+               return false; 
+           }
+
+       }
+        usleep(25000);  // wait 25 milliseconds 
+    }    
+    drone.stopMoving();
+    break_info = "stop_control";
+    return false; 
+}
+
+//--------------------------------------------------------------------
+
 bool CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_state r_state_0, robot_state r_state_to_go,vpRobotBebop2 &drone , bool break_at_CL, std::string &break_info)
 {
     // If relative == true, then:
     // the movement is executed relative to its current position.   
-
-
     bool arrive = false;
     while(stop_control == false)
     {   
@@ -477,12 +665,13 @@ bool CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_stat
         arma::vec::fixed<4> e = xd - x; // errror
         AngleWrap(e(3)); 
 
-        double norm_xyz_e = sqrt(e(0)*e(0) + e(1)*e(1) + e(2)*e(2));
-        double norm_yaw_e = sqrt(e(3)*e(3)); 
+          double norm_xy_e = sqrt(e(0)*e(0) + e(1)*e(1));
+        double norm_z_e = abs(e(2));
+        double norm_yaw_e = abs(e(3)); 
 
         //cout << e << endl;
 
-         if(norm_xyz_e < PAR.control.Max_error_xyz_reach_p && norm_yaw_e < PAR.control.Max_error_yaw_reach_p )
+         if(norm_xy_e < PAR.control.Max_error_xy_reach_p && norm_yaw_e < PAR.control.Max_error_yaw_reach_p && norm_z_e < PAR.control.Max_error_z_reach_p )
          {   
              drone.stopMoving(); 
              // if error is less than some threshold break
@@ -504,12 +693,8 @@ bool CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_stat
         double vy = -kx*e(1);
         double vz = -kx*e(2);
         double vyaw = -kx*e(3);
-
-        
-
        
         // transform velocities to bebop coodinate frame
-
         double a = x(3) + (3.1416/2) ;  // current yaw   
         arma::mat::fixed<2,2> Rb2n =  {{cos(a), -sin(a)},
                                            { sin(a), cos(a)}};
@@ -518,12 +703,9 @@ bool CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_stat
         v_xy_N(1) =  vy;                              
            
        arma::vec::fixed<2> v_xy_R = Rb2n.t()*v_xy_N;
-
-        //ve[0] = vy;
-        //ve[1] = -vx;
-        ve[0] = v_xy_R(0);
-        ve[1] = v_xy_R(1);
         
+        ve[0] = v_xy_R(0);
+        ve[1] = v_xy_R(1);        
         ve[2] = -vz;
         ve[3] = -vyaw;
 
@@ -538,10 +720,9 @@ bool CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_stat
         if(ve[3] < -PAR.control.MaxVel_yaw ) ve[3] = -PAR.control.MaxVel_yaw;
         
         drone.setVelocity(ve, 1.0);
-       // cout << "e: " << e(0) << " " << e(1) << " " << e(2) << " " << e(3)  << endl;
-        
-        //cout << "ve_n: " << vx << " " << vy << " " << vz << " " << vyaw  << endl;
 
+       // cout << "e: " << e(0) << " " << e(1) << " " << e(2) << " " << e(3)  << endl;        
+        //cout << "ve_n: " << vx << " " << vy << " " << vz << " " << vyaw  << endl;
         //cout << "ve_r: " << ve[0] << " " << ve[1] << " " << ve[2] << " " << ve[3]  << endl;
 
        if(break_at_CL == true) 
@@ -554,18 +735,12 @@ bool CONTROL::go_point(bool relative,LOCKS &locks,bool &stop_control, robot_stat
                return false; 
            }
 
-
        }
-
-
         usleep(40000);  // wait 40 milliseconds 
     }    
     drone.stopMoving();
     break_info = "stop_control";
     return false; 
-  
-
-
 
 }
 

@@ -175,7 +175,11 @@ struct CONTROL_par
   float MaxVel_xy;
   float MaxVel_z;
   float MaxVel_yaw;
-  float Max_error_xyz_reach_p;
+  float MaxVel_xy2;
+  float MaxVel_z2;
+  float MaxVel_yaw2;
+  float Max_error_xy_reach_p;
+  float Max_error_z_reach_p;
   float Max_error_yaw_reach_p;
   double kx;
   double ky;

@@ -322,7 +322,7 @@ void PLOT::init(EKF &ekf,GMAP &gmap,LOCKS &locks,bool &running)
             if(GLOBALmap.size() == GLOBALmap_color.size())
             {         
               cv::viz::WCloud cloud_g(GLOBALmap,GLOBALmap_color);
-              cloud_g.setRenderingProperty(cv::viz::POINT_SIZE, 1);
+              cloud_g.setRenderingProperty(cv::viz::POINT_SIZE, 2);
               viewer.showWidget( "Cloud_g", cloud_g );
             }                 
         }

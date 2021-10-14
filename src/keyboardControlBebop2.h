@@ -46,42 +46,42 @@
  
      case 'i':
        // Up
-       drone.setVerticalSpeed(10);
+       drone.setVerticalSpeed(20);
        break;
  
      case 'k':
        // Down
-       drone.setVerticalSpeed(-10);
+       drone.setVerticalSpeed(-20);
        break;
  
      case 'l':
        // Right
-       drone.setYawSpeed(10);
+       drone.setYawSpeed(50);
        break;
  
      case 'j':
        // Left
-       drone.setYawSpeed(-10);
+       drone.setYawSpeed(-50);
        break;
  
      case 'r':
        // Forward
-       drone.setPitch(10);
+       drone.setPitch(50);
        break;
  
      case 'f':
        // Backward
-       drone.setPitch(-10);
+       drone.setPitch(-50);
        break;
  
      case 'd':
        // Roll left
-       drone.setRoll(-10);
+       drone.setRoll(-50);
        break;
  
      case 'g':
        // Roll right
-       drone.setRoll(10);
+       drone.setRoll(50);
        break;
 
      case '1':

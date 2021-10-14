@@ -11,6 +11,19 @@
 
 
 
+
+
+
+
+struct gain
+{
+    double x;
+    double y;
+    double z;
+    double yaw;
+};
+
+
 struct robot_state
 {
     double x;
@@ -53,6 +66,8 @@ class CONTROL
         void control_plan(LOCKS &locks,bool &stop_control,ifstream &file_Control_plan,vpRobotBebop2 &drone); 
         
         bool go_point(bool relative,LOCKS &locks,bool &stop_control, robot_state r_state_at_home, robot_state r_state_to_go,vpRobotBebop2 &drone, bool break_at_CL, std::string &break_info);
+        bool go_point2(bool relative,LOCKS &locks,bool &stop_control, robot_state r_state_at_home, robot_state r_state_to_go,vpRobotBebop2 &drone, bool break_at_CL, std::string &break_info);
+
 
         void recognize_home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &drone);
 
@@ -60,7 +75,7 @@ class CONTROL
 
         void home(LOCKS &locks,bool &stop_control,vpRobotBebop2 &drone);
 
-
+        arma::vec::fixed<4> PI_control(arma::vec::fixed<4> xd, arma::vec::fixed<4> x, bool flag, gain &Kp, gain &Ki , double Ts);
     
 };
 

@@ -37,8 +37,8 @@ void GMAP::delete_ak2()
         if((AnchorsDATA[i].init_type == 1)&&(n_matched<minimun_n_of_kF_matched)) 
           AnchorsDATA.erase(AnchorsDATA.begin()+i);
 
-        if((AnchorsDATA[i].init_type == 0)&&(n_matched<2))
-            AnchorsDATA.erase(AnchorsDATA.begin()+i);
+        //if((AnchorsDATA[i].init_type == 0)&&(n_matched<2))
+        //    AnchorsDATA.erase(AnchorsDATA.begin()+i);
 
 
           //i--;
