@@ -43,6 +43,11 @@ void  PLOT::KeyboardViz3d(const viz::KeyboardEvent &w, void *t)
         cv::Affine3d Pose(Rxz, t_c);
         viewer->setViewerPose(Pose);
       } 
+       if (w.symbol == "F5")
+      {
+
+        viewer->saveScreenshot("ss.png");
+      }
 
        //cout << "you pressed "<< w.code<<" = "<<w.symbol<< " in viz window "<<viewer->getWindowName()<<"\n";
 }
