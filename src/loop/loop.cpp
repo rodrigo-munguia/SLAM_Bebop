@@ -785,7 +785,7 @@ bool check_matches(KEYFRAME Current_KF,vectorKeyF &KeyFDATA,int idx_indirect_lin
        
        if(inliers.size()> par.close_loop.min_inliers_for_potential_loop)
        {
-         cout << "Potential loop with KF: "<< i << "  inliers: " << inliers.size() << endl;
+        // cout << "Potential loop with KF: "<< i << "  inliers: " << inliers.size() << endl;
          MATCH mt;
          mt.number_matchs = inliers.size();
          mt.KeyFrame_idx = i;

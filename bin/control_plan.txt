@@ -1,4 +1,8 @@
 takeoff
-pointa,0,0,1.5,0
+pointa,0,.3
+pointa,0,0
+alta,1.2
 rechome
-
+startex
+pointa,0,1.5
+home

@@ -158,10 +158,7 @@ void BEBOPparameters(parameters &PAR)
 
 
    // Control
-   PAR.control.kx = 1;   // gain for x axis movements
-   PAR.control.ky = 1;   // gain for y axis movements
-   PAR.control.kz = 1;    // gain for x axis movements
-   PAR.control.kyaw = .5;   // gain for yaw movements
+   PAR.control.MaxTilt = 15; //  // Setting the max roll and pitch values, the drone speed will depend on it   
    PAR.control.MaxVel_xy = .5;  // m/s    Maximun velocity allowed for x-y movements
    PAR.control.MaxVel_z = .5; // m/s Maximun velocity allowed for z (vertical) movement
    PAR.control.MaxVel_yaw = 1; // rad/s Maximun velocity allowed for rotational (yaw) movement
@@ -169,13 +166,16 @@ void BEBOPparameters(parameters &PAR)
    PAR.control.MaxVel_z2 = 100; // percentage of maximun velocity allowed for z (vertical) movement
    PAR.control.MaxVel_yaw2 = 50; // parcentage of Maximun velocity allowed for rotational (yaw) movement
    PAR.control.Max_error_xy_reach_p = .1; // m  Maximun euclidean error allowed for considered a "go to point" command succesuful
-   PAR.control.Max_error_z_reach_p = .25;
+   PAR.control.Max_error_z_reach_p = .1;
    PAR.control.Max_error_yaw_reach_p = 5*(3.1416/180); // rads  Maximun rotational (yaw) error allowed for considered a "go to point" command succesuful  
-   PAR.control.home_x_a_def = .5; 
-   PAR.control.home_y_a_def = .5;
-   PAR.control.home_lamba = -.5;
- 
+   
+   PAR.control.intermediate_point_length_xy = .5; // (m)  xy-displasments are splitted if they are longer than this parameter 
+   PAR.control.sigma_x = .062;  // (m) velocity uncertanty for exploration
+   PAR.control.sigma_y = .062;  // (m) velocity uncertanty for exploration
 
+   PAR.control.home_x_max = .5; // (m) maximun half-rect x size for searching home 
+   PAR.control.home_y_max = .5; // (m) maximun half-rect x size for searching home 
+   PAR.control.home_lamba = -.5;
 
 } 
 

@@ -1,0 +1,130 @@
+Date : 2021-11-20 10:48:41
+Directory : /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop
+Total : 89 files,  14284 codes, 4019 comments, 5072 blanks, all 23375 lines
+
+Languages
++-------------+------------+------------+------------+------------+------------+
+| language    | files      | code       | comment    | blank      | total      |
++-------------+------------+------------+------------+------------+------------+
+| C++         |         82 |     14,129 |      3,982 |      4,975 |     23,086 |
+| Makefile    |          2 |         71 |         35 |         59 |        165 |
+| Markdown    |          1 |         29 |          0 |         28 |         57 |
+| Django HTML |          1 |         28 |          0 |          0 |         28 |
+| Django txt  |          2 |         20 |          0 |          6 |         26 |
+| Python      |          1 |          7 |          2 |          4 |         13 |
++-------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                 | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                    |         89 |     14,284 |      4,019 |      5,072 |     23,375 |
+| bin                                                                                  |          1 |          6 |          0 |          5 |         11 |
+| src                                                                                  |         84 |     14,145 |      3,984 |      4,988 |     23,117 |
+| src/Jacs                                                                             |          6 |        360 |        162 |        101 |        623 |
+| src/Transforms                                                                       |         11 |        210 |        154 |         90 |        454 |
+| src/anms                                                                             |          5 |      1,619 |        478 |        431 |      2,528 |
+| src/anms/range-tree                                                                  |          2 |        497 |         62 |        171 |        730 |
+| src/control                                                                          |          2 |        718 |        376 |        224 |      1,318 |
+| src/ekf                                                                              |         27 |      1,419 |        661 |        783 |      2,863 |
+| src/loop                                                                             |          3 |        699 |        325 |        290 |      1,314 |
+| src/map                                                                              |         12 |      1,631 |        420 |        637 |      2,688 |
+| src/matplotlib                                                                       |          3 |      4,039 |        259 |      1,257 |      5,555 |
+| src/vision                                                                           |          2 |        151 |        108 |         84 |        343 |
++--------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------+-------------+------------+------------+------------+------------+
+| filename                                                                             | language    | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------+-------------+------------+------------+------------+------------+
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/Makefile                            | Makefile    |         62 |         35 |         50 |        147 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/README.md                           | Markdown    |         29 |          0 |         28 |         57 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/bin/control_plan.txt                | Django txt  |          6 |          0 |          5 |         11 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/control_plan_example.txt            | Django txt  |         14 |          0 |          1 |         15 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/index-1.html                        | Django HTML |         28 |          0 |          0 |         28 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Bebop2.cpp                      | C++         |      1,454 |        648 |        442 |      2,544 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Bebop2.h                        | C++         |        217 |         89 |         59 |        365 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Fullnavdata.cpp                 | C++         |        225 |         23 |         91 |        339 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Fullnavdata.h                   | C++         |         68 |         61 |         34 |        163 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Jacs/JAC_XYZ_uvr.cpp            | C++         |         41 |         34 |         31 |        106 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Jacs/JacSystemPredictionV3b.cpp | C++         |        252 |         90 |         24 |        366 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Jacs/JacSystemPredictionV3b.h   | C++         |          7 |         18 |          5 |         30 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Jacs/Jac_XYZ_uvr.h              | C++         |         10 |          6 |         12 |         28 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Jacs/Jac_uv_XYZ.h               | C++         |         10 |          6 |         13 |         29 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Jacs/Jav_uv_XYZ.cpp             | C++         |         40 |          8 |         16 |         64 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/AngleWrap.cpp        | C++         |         16 |          0 |          3 |         19 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/AngleWrap.h          | C++         |          4 |          0 |          7 |         11 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/Euler_to_Ra2b.cpp    | C++         |         41 |         41 |         18 |        100 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/Euler_to_Ra2b.h      | C++         |          7 |         18 |          6 |         31 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/Geo2ECEF.cpp         | C++         |         21 |          4 |         14 |         39 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/Geo2ECEF.h           | C++         |          4 |          3 |          6 |         13 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/Makefile             | Makefile    |          9 |          0 |          9 |         18 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/Ra2b_TO_Quat_a2b.cpp | C++         |         11 |         24 |          6 |         41 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/Ra2b_TO_Quat_a2b.h   | C++         |          6 |         18 |          5 |         29 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/quat2R.cpp           | C++         |         85 |         28 |         11 |        124 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/Transforms/quat2R.h             | C++         |          6 |         18 |          5 |         29 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/anms/anms.cpp                   | C++         |        262 |          7 |         54 |        323 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/anms/anms.h                     | C++         |         44 |          8 |         24 |         76 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/anms/nanoflann.hpp              | C++         |        816 |        401 |        182 |      1,399 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/anms/range-tree/lrtypes.h       | C++         |         12 |          0 |          5 |         17 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/anms/range-tree/ranget.h        | C++         |        485 |         62 |        166 |        713 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/control/control.cpp             | C++         |        657 |        370 |        184 |      1,211 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/control/control.h               | C++         |         61 |          6 |         40 |        107 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/altitude_update.cpp         | C++         |         66 |          6 |         34 |        106 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/altitude_update.h           | C++         |          8 |          4 |          8 |         20 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/attitude_update.cpp         | C++         |         63 |        309 |         27 |        399 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/attitude_update.h           | C++         |         12 |          6 |          9 |         27 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/cl_position_update.cpp      | C++         |         39 |          5 |         31 |         75 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/cl_position_update.h        | C++         |          8 |          4 |         11 |         23 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/ekf.cpp                     | C++         |         89 |          6 |         44 |        139 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/ekf.h                       | C++         |         67 |          0 |         42 |        109 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/ekf_types.h                 | C++         |         70 |          5 |         20 |         95 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/prediction.cpp              | C++         |         59 |         51 |         36 |        146 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/prediction.h                | C++         |          8 |          4 |         10 |         22 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/speed_update.cpp            | C++         |         43 |         18 |         18 |         79 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/speed_update.h              | C++         |          8 |          4 |          9 |         21 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/store.cpp                   | C++         |        123 |          7 |         50 |        180 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/store.h                     | C++         |         13 |          0 |         14 |         27 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/system_init.cpp             | C++         |         55 |         17 |         23 |         95 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/system_init.h               | C++         |         11 |          4 |         11 |         26 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_delete_feats.cpp     | C++         |         48 |          9 |         41 |         98 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_delete_feats.h       | C++         |         11 |          4 |         11 |         26 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_init_anchors.cpp     | C++         |         67 |          7 |         52 |        126 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_init_anchors.h       | C++         |         12 |          4 |          8 |         24 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_init_w_range.cpp     | C++         |        160 |         83 |         82 |        325 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_init_w_range.h       | C++         |         14 |          4 |         17 |         35 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_match_feats.cpp      | C++         |        224 |         70 |         82 |        376 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_match_feats.h        | C++         |         21 |          4 |         14 |         39 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_update_f.cpp         | C++         |        106 |         22 |         64 |        192 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/ekf/visual_update_f.h           | C++         |         14 |          4 |         15 |         33 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/getData.cpp                     | C++         |        162 |         21 |         54 |        237 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/getData.h                       | C++         |         77 |         24 |         35 |        136 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/keyboardControlBebop2.cpp       | C++         |        278 |         72 |        125 |        475 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/keyboardControlBebop2.h         | C++         |        181 |         32 |         71 |        284 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/locks.h                         | C++         |         15 |          0 |         22 |         37 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/loop/cost_function_cl.h         | C++         |        193 |         31 |         79 |        303 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/loop/loop.cpp                   | C++         |        465 |        294 |        179 |        938 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/loop/loop.h                     | C++         |         41 |          0 |         32 |         73 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/Add_KeyFrames.cpp           | C++         |        279 |        125 |        103 |        507 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/Add_KeyFrames2.cpp          | C++         |        330 |         52 |        123 |        505 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/cost_function.h             | C++         |        172 |         48 |         66 |        286 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/delete_ak.cpp               | C++         |         83 |          5 |         35 |        123 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/g_store.cpp                 | C++         |         45 |          2 |         17 |         64 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/g_store.h                   | C++         |         13 |          0 |          9 |         22 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/local_bundle_ajustment.cpp  | C++         |        194 |         50 |         65 |        309 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/local_bundle_ajustment2.cpp | C++         |        200 |         53 |         60 |        313 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/map.cpp                     | C++         |         69 |          8 |         27 |        104 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/map.h                       | C++         |         66 |          1 |         55 |        122 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/map_types.h                 | C++         |         23 |          2 |         10 |         35 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/map/visual_match.cpp            | C++         |        157 |         74 |         67 |        298 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/matplotlib/matplotlibcpp.h      | C++         |      2,184 |        137 |        666 |      2,987 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/matplotlib/matplotlibcpp_x.h    | C++         |      1,848 |        120 |        587 |      2,555 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/matplotlib/numpy_flags.py       | Python      |          7 |          2 |          4 |         13 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/parameters.cpp                  | C++         |        128 |         12 |         43 |        183 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/parameters.h                    | C++         |        164 |         13 |         47 |        224 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/plot.cpp                        | C++         |        308 |         42 |         48 |        398 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/plot.h                          | C++         |         22 |          4 |         20 |         46 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/vision/vision.cpp               | C++         |        139 |         94 |         73 |        306 |
+| /home/rodrigo/Dropbox/RESEARCH/RTSLAM/SLAM_Bebop/src/vision/vision.h                 | C++         |         12 |         14 |         11 |         37 |
+| Total                                                                                |             |     14,284 |      4,019 |      5,072 |     23,375 |
++--------------------------------------------------------------------------------------+-------------+------------+------------+------------+------------+

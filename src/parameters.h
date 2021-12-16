@@ -171,23 +171,28 @@ struct PLOT_3D
 
 // Control
 struct CONTROL_par
-{
+{ 
+  float MaxTilt;
   float MaxVel_xy;
   float MaxVel_z;
   float MaxVel_yaw;
   float MaxVel_xy2;
   float MaxVel_z2;
   float MaxVel_yaw2;
+  
   float Max_error_xy_reach_p;
   float Max_error_z_reach_p;
-  float Max_error_yaw_reach_p;
-  double kx;
-  double ky;
-  double kz;
-  double kyaw;
+  float Max_error_yaw_reach_p;  
+  
   double home_lamba;
-  double home_x_a_def;
-  double home_y_a_def; 
+  double home_x_max;
+  double home_y_max;
+
+  double intermediate_point_length_xy;
+
+  double sigma_x;
+  double sigma_y;
+
 
 
 };

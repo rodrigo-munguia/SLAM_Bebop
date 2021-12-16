@@ -151,7 +151,7 @@ void control_t(CONTROL &control,vpRobotBebop2 &drone,EKF &ekf,LOCKS &locks,bool 
        std::cout << "\nConfiguring drone settings ...\n" << std::endl;
  
        
-        drone.setMaxTilt(10); // Setting the max roll and pitch values, the drone speed will depend on it
+        drone.setMaxTilt(par.control.MaxTilt); // Setting the max roll and pitch values, the drone speed will depend on it
        
  
        drone.doFlatTrim(); // Flat trim calibration
@@ -376,7 +376,7 @@ void ekf_slam(EKF &ekf,GMAP &gmap,LOOP &cloop,CONTROL &control,parameters &par,L
           ekf.prediction(delta_t); // EKF prediction  
 
           //locks.Set_robot_state_mtx.lock();
-            control.set_robot_state(ekf.x(7),ekf.x(8),ekf.x(9),ekf.z_yaw);            
+            control.set_robot_state(ekf.x(7),ekf.x(8),ekf.x(9),ekf.z_yaw,ekf.x(10),ekf.x(11),ekf.x(12));            
           //locks.Set_robot_state_mtx.unlock();
 
           dat = GetData::getDataB();  // Get Measurements           
